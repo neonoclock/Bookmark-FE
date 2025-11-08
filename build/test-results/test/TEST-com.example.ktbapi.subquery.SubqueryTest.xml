@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.ktbapi.subquery.SubqueryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-11-08T11:49:34.466Z" hostname="neonui-MacBookPro.local" time="0.225">
+<testsuite name="com.example.ktbapi.subquery.SubqueryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-11-08T12:27:45.171Z" hostname="neonui-MacBookPro.local" time="0.242">
   <properties/>
-  <testcase name="having subquery avg or more" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.039"/>
-  <testcase name="where exists subquery" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.037"/>
-  <testcase name="from subquery alternative (JPQL 대체 버전)" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.016"/>
-  <testcase name="where count subquery min2" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.075"/>
-  <testcase name="select subquery: project count per user" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.056"/>
-  <system-out><![CDATA[2025-11-08T20:49:34.463+09:00  INFO 58973 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.ktbapi.subquery.SubqueryTest]: SubqueryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2025-11-08T20:49:34.466+09:00  INFO 58973 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.ktbapi.KtbapiApplication for test class com.example.ktbapi.subquery.SubqueryTest
-2025-11-08T20:49:34.499+09:00 DEBUG 58973 --- [    Test worker] org.hibernate.SQL                        : 
+  <testcase name="having subquery avg or more" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.03"/>
+  <testcase name="where exists subquery" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.046"/>
+  <testcase name="from subquery alternative (JPQL 대체 버전)" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.018"/>
+  <testcase name="where count subquery min2" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.088"/>
+  <testcase name="select subquery: project count per user" classname="com.example.ktbapi.subquery.SubqueryTest" time="0.058"/>
+  <system-out><![CDATA[2025-11-08T21:27:45.169+09:00  INFO 62646 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.ktbapi.subquery.SubqueryTest]: SubqueryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-11-08T21:27:45.171+09:00  INFO 62646 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.ktbapi.KtbapiApplication for test class com.example.ktbapi.subquery.SubqueryTest
+2025-11-08T21:27:45.195+09:00 DEBUG 62646 --- [    Test worker] org.hibernate.SQL                        : 
     select
         p1_0.post_id,
         p1_0.user_id,
@@ -56,7 +56,7 @@ Hibernate:
         ) 
     order by
         p1_0.post_id
-2025-11-08T20:49:34.540+09:00 DEBUG 58973 --- [    Test worker] org.hibernate.SQL                        : 
+2025-11-08T21:27:45.247+09:00 DEBUG 62646 --- [    Test worker] org.hibernate.SQL                        : 
     select
         p1_0.post_id,
         p1_0.user_id,
@@ -96,7 +96,7 @@ Hibernate:
             comments c1_0 
         where
             c1_0.post_id=p1_0.post_id)
-2025-11-08T20:49:34.555+09:00 DEBUG 58973 --- [    Test worker] org.hibernate.SQL                        : 
+2025-11-08T21:27:45.264+09:00 DEBUG 62646 --- [    Test worker] org.hibernate.SQL                        : 
     select
         p1_0.post_id,
         p1_0.user_id,
@@ -140,7 +140,7 @@ Hibernate:
         p1_0.views>=avg(cast(p2_0.views as float(53))) 
     order by
         p1_0.post_id
-2025-11-08T20:49:34.633+09:00 DEBUG 58973 --- [    Test worker] org.hibernate.SQL                        : 
+2025-11-08T21:27:45.353+09:00 DEBUG 62646 --- [    Test worker] org.hibernate.SQL                        : 
     select
         p1_0.post_id,
         p1_0.user_id,
@@ -184,7 +184,7 @@ Hibernate:
             where
                 c1_0.post_id=p1_0.post_id
         )>=2
-2025-11-08T20:49:34.689+09:00 DEBUG 58973 --- [    Test worker] org.hibernate.SQL                        : 
+2025-11-08T21:27:45.412+09:00 DEBUG 62646 --- [    Test worker] org.hibernate.SQL                        : 
     select
         u1_0.email,
         (select
