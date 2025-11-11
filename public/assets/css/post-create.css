@@ -1,4 +1,3 @@
-/* ===== 기본 ===== */
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -17,7 +16,7 @@ body{
   --error:#e11d48;
   --primary:#bba7ff;
   --primary-press:#a896ff;
-  --w: 760px;           /* 폼 전체 폭 (라인형 인풋 길이) */
+  --w: 760px;
 }
 
 /* ===== 헤더 ===== */
@@ -39,9 +38,14 @@ body{
 
 /* ===== 레이아웃 ===== */
 .layout{
-  max-width: var(--w);
-  margin: 28px auto 80px;
+  max-width: 960px;
+  margin: 32px auto 80px;
   padding: 0 16px;
+
+  /* 👉 중앙 컬럼 정렬 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .page-title{
   margin: 8px 0 22px;
@@ -64,7 +68,7 @@ input[type="text"],
 textarea{
   width:100%;
   border:0;
-  border-bottom:1px solid #e5e7eb;  /* 라인형 인풋 */
+  border-bottom:1px solid #e5e7eb;
   background:transparent;
   outline:none;
   font-size:14px;
@@ -72,7 +76,7 @@ textarea{
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 textarea{
-  min-height: 140px;                 /* 스샷처럼 넓은 입력 영역 */
+  min-height: 140px;
   resize: vertical;
 }
 input::placeholder, textarea::placeholder{ color:#9aa1ac; }
@@ -108,9 +112,9 @@ input:focus, textarea:focus{
 /* 제출 버튼 */
 .actions{ display:flex; justify-content:center; margin-top: 8px; }
 .btn{
-  width: 60%;           /* ✅ 버튼을 폼 전체 폭으로 확장 */
-  max-width: 760px;      /* 레이아웃 폭과 동일하게 제한 */
-  height: 42px;          /* 살짝 더 높게 */
+  width: 60%;
+  max-width: 760px;
+  height: 42px;
   border:0;
   border-radius:10px;
   font-weight:700;
@@ -119,7 +123,7 @@ input:focus, textarea:focus{
 .primary{ background:var(--primary); color:#fff; }
 .primary:active{ background:var(--primary-press); }
 
-/* 다크모드(선택) */
+/* 다크모드 */
 @media (prefers-color-scheme: dark){
   body{ background:#0f1115; color:#e5e7eb; }
   .site-header{ border-bottom-color:#232633; }
