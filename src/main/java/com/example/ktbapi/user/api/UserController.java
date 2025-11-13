@@ -2,6 +2,8 @@ package com.example.ktbapi.user.api;
 
 import com.example.ktbapi.common.ApiResponse;
 import com.example.ktbapi.common.dto.IdResponse;
+import com.example.ktbapi.common.exception.UnauthorizedException;
+import com.example.ktbapi.user.dto.LoginRequest;
 import com.example.ktbapi.user.dto.SignupRequest;
 import com.example.ktbapi.user.dto.ProfileUpdateRequest;
 import com.example.ktbapi.user.dto.PasswordUpdateRequest;
@@ -11,9 +13,9 @@ import com.example.ktbapi.user.repo.UserJpaRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 @CrossOrigin(origins = "http://172.16.24.172:5500")
+
 @RestController
 @RequestMapping("/api/v1/users")
 @Tag(name = "Users", description = "회원 가입/조회/수정/삭제")
@@ -25,6 +27,7 @@ public class UserController {
         this.userRepo = userRepo;
     }
 
+   
     @PostMapping
     public ApiResponse<IdResponse> signup(@Valid @RequestBody SignupRequest req) {
         User user = new User(req.email, req.password, req.nickname, UserRole.USER);
@@ -32,12 +35,31 @@ public class UserController {
         return ApiResponse.success(new IdResponse(user.getId()));
     }
 
+
+    @PostMapping("/login")
+    public ApiResponse<User> login(@Valid @RequestBody LoginRequest req) {
+  
+        User user = userRepo.findByEmail(req.email)
+                .orElseThrow(() -> new UnauthorizedException("invalid credentials"));
+
+        
+        if (!user.getPassword().equals(req.password)) {
+            throw new UnauthorizedException("invalid credentials");
+        }
+
+
+
+        return ApiResponse.success(user);
+    }
+
+
     @GetMapping("/{userId}")
     public ApiResponse<User> getUser(@PathVariable Long userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return ApiResponse.success(user);
     }
+
 
     @PatchMapping("/{userId}/profile")
     public ApiResponse<Void> updateProfile(
@@ -55,6 +77,7 @@ public class UserController {
         userRepo.save(user);
         return ApiResponse.success();
     }
+
 
     @PatchMapping("/{userId}/password")
     public ApiResponse<Void> updatePassword(
@@ -74,6 +97,7 @@ public class UserController {
         return ApiResponse.success();
     }
 
+
     @DeleteMapping("/{userId}")
     public ApiResponse<Void> deleteUser(@PathVariable Long userId) {
         User user = userRepo.findById(userId)
@@ -83,5 +107,4 @@ public class UserController {
 
         return ApiResponse.success();
     }
-
 }
