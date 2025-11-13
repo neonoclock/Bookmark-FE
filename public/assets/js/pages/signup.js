@@ -86,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginLink = $(".link-btn");
   const submitBtn = $(".btn.primary");
 
+  const avatarLabel = avatarField.querySelector(".avatar-upload");
+  const avatarPlus = avatarLabel?.querySelector(".plus");
+
   let avatarDataUrl = null;
 
   on(avatarIn, "change", () => {
@@ -95,6 +98,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!file) {
       avatarDataUrl = null;
       setHelper(avatarField, "", false);
+
+      if (avatarLabel) {
+        avatarLabel.style.backgroundImage = "";
+      }
+      if (avatarPlus) {
+        avatarPlus.style.opacity = "1";
+      }
       return;
     }
 
@@ -103,18 +113,44 @@ document.addEventListener("DOMContentLoaded", () => {
       avatarDataUrl = null;
       setHelper(avatarField, "이미지 크기는 2MB 이하여야 합니다.", true);
       avatarIn.value = "";
+
+      if (avatarLabel) {
+        avatarLabel.style.backgroundImage = "";
+      }
+      if (avatarPlus) {
+        avatarPlus.style.opacity = "1";
+      }
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      avatarDataUrl = e.target.result; // data:image/png;base64,.... 형태
+      avatarDataUrl = e.target.result;
+
+      if (avatarLabel) {
+        avatarLabel.style.backgroundImage = `url(${avatarDataUrl})`;
+        avatarLabel.style.backgroundSize = "cover";
+        avatarLabel.style.backgroundPosition = "center";
+        avatarLabel.style.backgroundRepeat = "no-repeat";
+      }
+
+      if (avatarPlus) {
+        avatarPlus.style.opacity = "0";
+      }
+
       setHelper(avatarField, `선택된 파일: ${file.name}`, false);
       console.log("[EVT] avatar base64 length:", avatarDataUrl?.length);
     };
     reader.onerror = () => {
       avatarDataUrl = null;
       setHelper(avatarField, "이미지를 읽는 중 오류가 발생했습니다.", true);
+
+      if (avatarLabel) {
+        avatarLabel.style.backgroundImage = "";
+      }
+      if (avatarPlus) {
+        avatarPlus.style.opacity = "1";
+      }
     };
 
     reader.readAsDataURL(file);
