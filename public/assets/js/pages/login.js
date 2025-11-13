@@ -1,5 +1,3 @@
-// public/assets/js/pages/login.js
-
 import {
   $,
   setHelper,
@@ -14,7 +12,6 @@ function isValidEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
-// 클라이언트 측 기본 검증
 function validate({ email, pw }) {
   let valid = true;
 
@@ -34,7 +31,6 @@ function validate({ email, pw }) {
   return valid;
 }
 
-// 서버에서 내려준 에러 메세지 처리
 function handleServerError(message, { emailEl, pwEl }) {
   switch (message) {
     case "invalid email format":
@@ -47,7 +43,6 @@ function handleServerError(message, { emailEl, pwEl }) {
       setHelper(pwEl, "비밀번호를 입력해주세요.", true);
       break;
     case "invalid credentials":
-      // 로그인 정보 틀렸을 때
       setHelper(pwEl, "이메일 또는 비밀번호가 올바르지 않습니다.", true);
       break;
     default:
@@ -62,16 +57,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitBtn = $(".btn.primary");
   const signupLink = $(".link-btn");
 
-  // "회원가입" 버튼 클릭 → 회원가입 페이지로 이동
   on(signupLink, "click", () => {
     window.location.href = "./signup.html";
   });
 
-  // 로그인 폼 제출 이벤트
   on(form, "submit", async (e) => {
     e.preventDefault();
 
-    // 기존 helper 초기화
     clearFormHelpers(form);
 
     const email = emailEl.value.trim();
@@ -83,10 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setDisabled(submitBtn, true);
 
     try {
-      // remember_me는 일단 false로 고정
       const user = await AuthAPI.login(email, pw, false);
 
-      // user 엔티티 JSON을 바로 받기 때문에 필요한 정보만 저장
       if (user?.id) {
         saveAuth({
           id: user.id,
@@ -98,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       alert("로그인에 성공했습니다.");
-      // 로그인 후 게시판으로 이동 (원하는 페이지로 변경 가능)
+
       window.location.href = "./board.html";
     } catch (err) {
       console.error("login error:", err);
