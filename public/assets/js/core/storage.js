@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // public/assets/js/core/storage.js
 
 // 로컬스토리지에 저장할 key 이름
@@ -37,10 +38,25 @@ export function loadAuth() {
 /**
  * 저장된 사용자 정보를 삭제 (로그아웃 시 사용)
  */
+=======
+const AUTH_KEY = "AUTH";
+
+export function saveAuth(data) {
+  localStorage.setItem(AUTH_KEY, JSON.stringify(data));
+}
+
+export function loadAuth() {
+  const raw = localStorage.getItem(AUTH_KEY);
+  if (!raw) return null;
+  return JSON.parse(raw);
+}
+
+>>>>>>> 71318464e1514d02f46129d428ac2ccc64993a99
 export function clearAuth() {
   localStorage.removeItem(AUTH_KEY);
 }
 
+<<<<<<< HEAD
 /**
  * 현재 로그인 유저의 ID만 편하게 가져오는 유틸
  * 예: loadUserId() → 3
@@ -48,4 +64,9 @@ export function clearAuth() {
 export function loadUserId() {
   const auth = loadAuth();
   return auth?.id ?? null;
+=======
+export function getToken() {
+  const auth = loadAuth();
+  return auth?.token || null;
+>>>>>>> 71318464e1514d02f46129d428ac2ccc64993a99
 }

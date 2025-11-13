@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export const $ = (selector, root = document) => root.querySelector(selector);
 export const $$ = (selector, root = document) =>
   Array.from(root.querySelectorAll(selector));
@@ -55,4 +56,12 @@ export function on(target, event, handler, root = document) {
   const el = typeof target === "string" ? $(target, root) : target;
   if (!el) return;
   el.addEventListener(event, handler);
+=======
+// dom.js
+export const $ = (sel, el = document) => el.querySelector(sel);
+export const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
+
+export function on(target, event, handler) {
+  target.addEventListener(event, handler);
+>>>>>>> 71318464e1514d02f46129d428ac2ccc64993a99
 }
