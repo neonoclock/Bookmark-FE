@@ -126,7 +126,6 @@ body {
 
 /* 타이틀 앞에 책 이모지 자동 추가 */
 .signup-title::before {
-  content: "📚";
   display: inline-block;
   margin-right: 6px;
   transform: translateY(1px);
