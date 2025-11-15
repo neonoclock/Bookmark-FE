@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>아무 말 대잔치 - 회원가입</title>
+    <title>책갈피 - 회원가입</title>
     <link rel="stylesheet" href="./assets/css/signup.css" />
   </head>
   <body>
@@ -12,7 +12,7 @@
         <a class="back" href="javascript:history.back()" aria-label="뒤로가기"
           >←</a
         >
-        <h1 class="brand">아무 말 대잔치</h1>
+        <h1 class="brand">책갈피</h1>
       </div>
     </header>
 
@@ -22,7 +22,6 @@
 
         <div class="field block">
           <label class="label">프로필 사진</label>
-          <p class="helper error"><span class="star">*</span> helper text</p>
 
           <label class="avatar-upload">
             <input id="avatar" type="file" accept="image/*" hidden />
@@ -33,42 +32,38 @@
         <form class="form">
           <div class="field">
             <label for="email" class="label"
-              >이메일<span class="req">*</span></label
-            >
+              >이메일<span class="req"></span
+            ></label>
             <input id="email" type="email" placeholder="이메일을 입력하세요" />
-            <p class="helper error"><span class="star">*</span> helper text</p>
           </div>
 
           <div class="field">
             <label for="pw" class="label"
-              >비밀번호<span class="req">*</span></label
-            >
+              >비밀번호<span class="req"></span
+            ></label>
             <input
               id="pw"
               type="password"
               placeholder="비밀번호를 입력하세요"
             />
-            <p class="helper error"><span class="star">*</span> helper text</p>
           </div>
 
           <div class="field">
             <label for="pw2" class="label"
-              >비밀번호 확인<span class="req">*</span></label
-            >
+              >비밀번호 확인<span class="req"></span
+            ></label>
             <input
               id="pw2"
               type="password"
               placeholder="비밀번호를 한번 더 입력하세요"
             />
-            <p class="helper error"><span class="star">*</span> helper text</p>
           </div>
 
           <div class="field">
             <label for="nick" class="label"
-              >닉네임<span class="req">*</span></label
-            >
+              >닉네임<span class="req"></span
+            ></label>
             <input id="nick" type="text" placeholder="닉네임을 입력하세요" />
-            <p class="helper error"><span class="star">*</span> helper text</p>
           </div>
 
           <button class="btn primary" type="submit">회원가입</button>
