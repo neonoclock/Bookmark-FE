@@ -1,4 +1,3 @@
-/* 기본 구조 */
 *,
 *::before,
 *::after {
@@ -13,14 +12,13 @@ body {
 body {
   margin: 0;
 
-  background: #faefef; /* ✅ 전체를 같은 핑크로 통일 */
+  background: #faefef;
 
   color: #2b251d;
   font-family: ui-sans-serif, -apple-system, "Apple SD Gothic Neo", Roboto,
     "Noto Sans KR", Arial, "맑은 고딕", system-ui, sans-serif;
 }
 
-/* ===== 로즈핑크 테마 색상 ===== */
 :root {
   --brand: #5a2e3c;
   --border: #e6d5d0;
@@ -35,7 +33,6 @@ body {
   --w-field: 420px;
 }
 
-/* ===== 헤더 ===== */
 .site-header {
   background: transparent;
   border-bottom: 1px solid #e8d5d7;
@@ -61,8 +58,6 @@ body {
   font-family: "Nanum Myeongjo", serif;
 }
 
-/* ★ brand 밑 하이라이트(선) 제거 – brand::after 블록 통째로 삭제 */
-
 .back {
   position: absolute;
   left: 16px;
@@ -73,17 +68,15 @@ body {
   color: #8c6b6e;
 }
 
-/* ===== 레이아웃 ===== */
 .auth-layout {
   min-height: calc(100vh - 58px);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding-top: 56px;
-  padding-bottom: 72px; /* ✅ 화면 아래 여백 추가 */
+  padding-bottom: 72px;
 }
 
-/* ===== 카드 ===== */
 .signup-card {
   position: relative;
   text-align: center;
@@ -96,7 +89,6 @@ body {
   width: 100%;
 }
 
-/* 위에 마스킹테이프/리본 느낌 */
 .signup-card::before {
   content: "";
   position: absolute;
@@ -116,7 +108,6 @@ body {
   opacity: 0.9;
 }
 
-/* ===== 타이틀 ===== */
 .signup-title {
   margin: 10px 0 24px;
   font-size: 24px;
@@ -124,14 +115,12 @@ body {
   color: var(--brand);
 }
 
-/* 타이틀 앞에 책 이모지 자동 추가 */
 .signup-title::before {
   display: inline-block;
   margin-right: 6px;
   transform: translateY(1px);
 }
 
-/* ===== 레이블 ===== */
 .label {
   display: block;
   width: var(--w-field);
@@ -146,7 +135,6 @@ body {
   color: #c54f6b;
 }
 
-/* ===== 헬퍼 ===== */
 .helper {
   width: var(--w-field);
   margin: 4px auto 12px;
@@ -160,7 +148,6 @@ body {
   color: var(--error);
 }
 
-/* ===== 아바타 업로드 – 기울어진 그림자 + hover 약간 흔들림 ===== */
 .avatar-upload {
   width: 150px;
   height: 200px;
@@ -179,7 +166,6 @@ body {
   transition: transform 0.15s ease;
 }
 
-/* 기울어진 그림자 */
 .avatar-upload::before {
   content: "";
   position: absolute;
@@ -190,7 +176,6 @@ body {
   z-index: -1;
 }
 
-/* 책갈피 탭 */
 .avatar-upload::after {
   content: "";
   position: absolute;
@@ -202,7 +187,6 @@ body {
   clip-path: polygon(0 0, 100% 0, 100% 74%, 50% 100%, 0 74%);
 }
 
-/* hover 시 살짝 들썩 */
 .avatar-upload:hover {
   transform: translateY(-2px) rotate(-1deg);
 }
@@ -212,7 +196,6 @@ body {
   color: #b58a93;
 }
 
-/* ===== 폼 ===== */
 .form {
   display: flex;
   flex-direction: column;
@@ -226,7 +209,6 @@ body {
   text-align: left;
 }
 
-/* input */
 .field input {
   width: 100%;
   height: var(--input-h);
@@ -245,7 +227,6 @@ body {
   color: #c7afb3;
 }
 
-/* focus 시 살짝 통통 올라오는 느낌 */
 .field input:focus {
   border-color: #e29bad;
   box-shadow: 0 0 0 4px rgba(226, 155, 173, 0.26);
@@ -253,7 +234,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* ===== 버튼 (bounce 유지 + 살짝 더 귀엽게) ===== */
 .btn {
   width: var(--w-field);
   height: 48px;
@@ -271,7 +251,6 @@ body {
   box-shadow: 0 10px 25px rgba(210, 107, 130, 0.28);
 }
 
-/* hover: 아주 살짝 bounce */
 .primary:hover {
   background: #c16379;
   transform: translateY(-1px) scale(1.015);
@@ -284,7 +263,6 @@ body {
   box-shadow: 0 8px 20px rgba(183, 90, 112, 0.35);
 }
 
-/* ===== 링크 버튼 – 점선 밑줄 + 화살표 ===== */
 .link-btn {
   margin-top: 6px;
   background: transparent;
@@ -303,7 +281,6 @@ body {
   font-size: 12px;
 }
 
-/* ===== 다크모드 ===== */
 @media (prefers-color-scheme: dark) {
   body {
     background: radial-gradient(
@@ -368,16 +345,15 @@ body {
   }
 }
 
-/* === 중앙 정렬용 보정 === */
 .signup-card {
   display: flex;
   flex-direction: column;
-  align-items: center; /* 프로필 + 모든 요소 가로 중앙 */
+  align-items: center;
 }
 
 .label,
 .helper,
 .field {
   width: 100%;
-  max-width: var(--w-field); /* 고정폭 → 최대폭으로 */
+  max-width: var(--w-field);
 }

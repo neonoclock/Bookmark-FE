@@ -1,4 +1,3 @@
-/* 기본 구조 */
 *,
 *::before,
 *::after {
@@ -10,26 +9,24 @@ body {
 }
 body {
   margin: 0;
-  background: #faefef; /* 책갈피 테마 배경 */
+  background: #faefef;
   color: #2b251d;
   font-family: ui-sans-serif, -apple-system, "Apple SD Gothic Neo", Roboto,
     "Noto Sans KR", Arial, "맑은 고딕", system-ui, sans-serif;
 }
 
-/* 테마 변수 */
 :root {
   --brand: #5a2e3c;
   --border: #e6d5d0;
   --muted: #9b7a7a;
   --primary: #d26b82;
   --primary-press: #b75a70;
-  --card-bg: #fdf7f6;
+  --card-bg: ##fdf7f6;
   --card-w: 640px;
   --radius: 18px;
   --shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
 }
 
-/* ===== 헤더 ===== */
 .site-header {
   background: transparent;
   border-bottom: 1px solid #e8d5d7;
@@ -55,7 +52,6 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* 아바타 + 드롭다운 래퍼 */
 .avatar-wrap {
   position: absolute;
   right: 16px;
@@ -63,7 +59,6 @@ body {
   transform: translateY(-50%);
 }
 
-/* 아바타 버튼 */
 .avatar {
   width: 36px;
   height: 36px;
@@ -79,7 +74,6 @@ body {
   color: #b0586f;
 }
 
-/* 드롭다운 메뉴 */
 .avatar-menu {
   position: absolute;
   right: 0;
@@ -117,7 +111,6 @@ body {
   background: #ffeef4;
 }
 
-/* ===== 인트로 영역 ===== */
 .intro {
   max-width: var(--card-w);
   margin: 28px auto 32px;
@@ -138,7 +131,6 @@ body {
   color: var(--muted);
 }
 
-/* 공통 버튼 */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -171,12 +163,10 @@ body {
   box-shadow: 0 8px 20px rgba(183, 90, 112, 0.32);
 }
 
-/* 인트로 버튼은 그냥 아래에 두기 */
 .intro .btn {
   margin-top: 6px;
 }
 
-/* ===== 목록 ===== */
 .board {
   max-width: var(--card-w);
   margin: 0 auto 80px;
@@ -186,12 +176,10 @@ body {
   gap: 18px;
 }
 
-/* ===== 게시글 카드 ===== */
 .post {
   position: relative;
 
-  /* 🎨 여기서 카드 색상 변경 */
-  background: #ffffff; /* 훨씬 밝은 크림핑크 */
+  background: #fdf7f6;
 
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -202,7 +190,6 @@ body {
   cursor: pointer;
 }
 
-/* 왼쪽 책등 */
 .post::before {
   content: "";
   position: absolute;
@@ -214,7 +201,6 @@ body {
   box-shadow: inset -2px 0 4px rgba(0, 0, 0, 0.08);
 }
 
-/* 상단 책갈피 */
 .post::after {
   content: "";
   position: absolute;
@@ -227,10 +213,9 @@ body {
   clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
 }
 
-/* ===== 카드 상단 ===== */
 .post-head {
   display: flex;
-  flex-direction: column; /* 제목 + 날짜 세로 배치 */
+  flex-direction: column;
   align-items: flex-start;
   gap: 4px;
 }
@@ -249,7 +234,6 @@ body {
   color: #9b7a7a;
 }
 
-/* 메타 */
 .post-meta {
   display: flex;
   gap: 10px;
@@ -257,14 +241,12 @@ body {
   color: var(--muted);
 }
 
-/* 구분선 */
 .post-divider {
   height: 1px;
   background: #f1dde1;
   margin: 10px 0 12px;
 }
 
-/* 푸터(작성자) */
 .post-footer {
   display: flex;
   align-items: center;
@@ -284,7 +266,6 @@ body {
   color: #4b3036;
 }
 
-/* ===== 다크모드 ===== */
 @media (prefers-color-scheme: dark) {
   body {
     background: radial-gradient(

@@ -188,7 +188,7 @@ function setupAccountButtons() {
         await UsersAPI.deleteUser(userId);
         alert("회원 탈퇴가 완료되었습니다.");
         clearAuth();
-        window.location.href = "./login.html";
+        window.location.href = "./index.html";
       } catch (e) {
         console.error(e);
         alert(e.message || "회원 탈퇴에 실패했습니다.");

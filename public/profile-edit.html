@@ -6,6 +6,7 @@
     <title>책갈피 - 회원정보수정</title>
     <link rel="stylesheet" href="./assets/css/profile-edit.css" />
   </head>
+
   <body>
     <!-- 헤더 -->
     <header class="site-header">
@@ -25,6 +26,7 @@
           >
             🐧
           </button>
+
           <nav
             class="menu"
             id="profileMenu"
@@ -42,62 +44,69 @@
     </header>
 
     <!-- 본문 -->
-    <main class="page">
-      <h2 class="page-title">회원정보수정</h2>
+    <main class="layout">
+      <section class="page">
+        <h2 class="page-title">회원정보수정</h2>
 
-      <!-- 프로필 사진 섹션 -->
-      <section class="section profile">
-        <p class="field-label">프로필 사진 <span class="req">*</span></p>
-        <p class="helper error"><span class="star">*</span> helper text</p>
+        <!-- 프로필 사진 섹션 -->
+        <section class="section profile">
+          <p class="field-label">프로필 사진 <span class="req">*</span></p>
+          <p class="helper error"><span class="star">*</span> helper text</p>
 
-        <label class="avatar-uploader">
-          <input type="file" accept="image/*" hidden />
-          <img
-            src="https://placehold.co/200x200/aaaaaa/ffffff?text=%20"
-            alt="프로필 미리보기"
-          />
-          <span class="badge">변경</span>
-        </label>
-      </section>
+          <label class="avatar-uploader">
+            <input type="file" accept="image/*" hidden />
+            <img
+              src="https://placehold.co/200x200/aaaaaa/ffffff?text=%20"
+              alt="프로필 미리보기"
+            />
+            <span class="badge">변경</span>
+          </label>
+        </section>
 
-      <!-- 정보 폼 -->
-      <form class="form" autocomplete="off">
-        <div class="field">
-          <label class="input-label">이메일</label>
-          <p class="readonly">startupcode@gmail.com</p>
-        </div>
-
-        <div class="field">
-          <label for="nick" class="input-label">닉네임</label>
-          <div class="row">
-            <input id="nick" type="text" placeholder="닉네임을 입력하세요" />
+        <!-- 정보 폼 -->
+        <form class="form" autocomplete="off">
+          <div class="field">
+            <label class="input-label">이메일</label>
+            <p class="readonly">startupcode@gmail.com</p>
           </div>
-        </div>
 
-        <button type="button" class="btn primary block">수정하기</button>
-        <button type="button" class="link danger">회원 탈퇴</button>
-        <button type="button" class="btn primary pill">완료</button>
-      </form>
+          <div class="field">
+            <label for="nick" class="input-label">닉네임</label>
+            <div class="row">
+              <input id="nick" type="text" placeholder="닉네임을 입력하세요" />
+            </div>
+          </div>
+
+          <button type="button" class="btn primary block">수정하기</button>
+          <button type="button" class="link danger">회원 탈퇴</button>
+          <button type="button" class="btn primary pill">완료</button>
+        </form>
+      </section>
     </main>
 
+    <!-- 드롭다운 스크립트 -->
     <script>
       (function () {
         const wrap = document.getElementById("avatarWrap");
         const btn = document.getElementById("avatarBtn");
-        function close() {
+
+        function closeMenu() {
           wrap.classList.remove("open");
           btn.setAttribute("aria-expanded", "false");
         }
+
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
-          const o = wrap.classList.toggle("open");
-          btn.setAttribute("aria-expanded", String(o));
+          const opened = wrap.classList.toggle("open");
+          btn.setAttribute("aria-expanded", String(opened));
         });
+
         document.addEventListener("click", (e) => {
-          if (!wrap.contains(e.target)) close();
+          if (!wrap.contains(e.target)) closeMenu();
         });
+
         document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") close();
+          if (e.key === "Escape") closeMenu();
         });
       })();
     </script>

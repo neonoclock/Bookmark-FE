@@ -1,6 +1,3 @@
-/* public/assets/css/post-edit.css */
-
-/* 기본 구조 */
 *,
 *::before,
 *::after {
@@ -12,13 +9,12 @@ body {
 }
 body {
   margin: 0;
-  background: #faefef; /* 책갈피 테마 배경 */
+  background: #faefef;
   color: #2b251d;
   font-family: ui-sans-serif, -apple-system, "Apple SD Gothic Neo", Roboto,
     "Noto Sans KR", Arial, "맑은 고딕", system-ui, sans-serif;
 }
 
-/* 테마 변수 */
 :root {
   --brand: #5a2e3c;
   --border: #e6d5d0;
@@ -29,7 +25,6 @@ body {
   --w: 760px;
 }
 
-/* ===== Header ===== */
 .site-header {
   border-bottom: 1px solid #e8d5d7;
   background: transparent;
@@ -63,7 +58,6 @@ body {
   color: #8c6b6e;
 }
 
-/* 아바타 + 드롭다운 (board와 통일) */
 .avatar-wrap {
   position: absolute;
   right: 16px;
@@ -121,11 +115,10 @@ body {
   color: #b91c1c;
 }
 
-/* ===== 레이아웃 ===== */
 .layout {
   max-width: var(--w);
   margin: 0 auto;
-  padding: 60px 16px 140px; /* 위 아래 여백 넉넉 */
+  padding: 60px 16px 140px;
 
   display: flex;
   flex-direction: column;
@@ -136,9 +129,9 @@ body {
 }
 
 .brand a {
-  color: inherit; /* brand 색상 그대로 따라감 */
-  text-decoration: none; /* 밑줄 제거 */
-  display: inline-block; /* 정렬 안정화 */
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .page-title {
@@ -149,7 +142,6 @@ body {
   color: var(--brand);
 }
 
-/* ===== 수정 폼 (노트 느낌) ===== */
 .edit-form {
   width: 100%;
   padding: 24px 6px 20px;
@@ -161,7 +153,6 @@ body {
   overflow: hidden;
 }
 
-/* 왼쪽 노트 마진 라인 */
 .edit-form::before {
   content: "";
   position: absolute;
@@ -172,13 +163,11 @@ body {
   background: rgba(226, 155, 173, 0.5);
 }
 
-/* 안쪽 내용 정렬 */
 .edit-inner {
   max-width: 100%;
-  padding: 0 18px 4px 40px; /* 왼쪽은 노트 마진 고려 */
+  padding: 0 18px 4px 40px;
 }
 
-/* ===== 필드 ===== */
 .field {
   margin: 18px 0 26px;
 }
@@ -199,7 +188,6 @@ body {
   font-weight: 800;
 }
 
-/* 입력 요소 – 언더라인 스타일 */
 input[type="text"],
 textarea {
   width: 100%;
@@ -227,7 +215,6 @@ textarea:focus {
   box-shadow: 0 2px 0 0 rgba(226, 155, 173, 0.45);
 }
 
-/* ===== 파일 업로드 라인 ===== */
 .upload {
   display: flex;
   align-items: center;
@@ -264,7 +251,6 @@ textarea:focus {
   color: #9b7a7a;
 }
 
-/* 보조 텍스트 / 에러 */
 .helper {
   margin: 4px 0 0;
   font-size: 12px;
@@ -274,7 +260,6 @@ textarea:focus {
   color: var(--error);
 }
 
-/* 구분선(필요 시) */
 .divider {
   height: 1px;
   border: 0;
@@ -282,7 +267,6 @@ textarea:focus {
   margin: 18px 0 12px;
 }
 
-/* ===== 제출 버튼 ===== */
 .actions {
   display: flex;
   justify-content: center;
@@ -314,7 +298,6 @@ textarea:focus {
   transform: translateY(0) scale(0.985);
 }
 
-/* ===== 다크모드 ===== */
 @media (prefers-color-scheme: dark) {
   body {
     background: radial-gradient(

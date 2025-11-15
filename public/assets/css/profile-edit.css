@@ -1,4 +1,3 @@
-/* ===== 기본 ===== */
 *,
 *::before,
 *::after {
@@ -12,13 +11,12 @@ body {
 
 body {
   margin: 0;
-  background: #faefef; /* ✅ 책갈피 테마 배경 */
+  background: #faefef;
   color: #2b251d;
   font-family: ui-sans-serif, -apple-system, "Apple SD Gothic Neo", Roboto,
     "Noto Sans KR", Arial, "맑은 고딕", system-ui, sans-serif;
 }
 
-/* ===== 로즈핑크 테마 변수 ===== */
 :root {
   --brand: #5a2e3c;
   --border: #e6d5d0;
@@ -28,10 +26,9 @@ body {
   --primary: #d26b82;
   --primary-press: #b75a70;
 
-  --col-w: 420px; /* 필드 폭 */
+  --col-w: 420px;
 }
 
-/* ===== 헤더 ===== */
 .site-header {
   background: transparent;
   border-bottom: 1px solid #e8d5d7;
@@ -57,7 +54,6 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* 뒤로가기 버튼이 있다면 */
 .back {
   position: absolute;
   left: 16px;
@@ -68,7 +64,6 @@ body {
   color: #8c6b6e;
 }
 
-/* 오른쪽 프로필 & 드롭다운 */
 .avatar-wrap {
   position: absolute;
   right: 16px;
@@ -91,7 +86,6 @@ body {
   color: #b0586f;
 }
 
-/* 드롭다운 메뉴 */
 .menu {
   position: absolute;
   right: 0;
@@ -133,7 +127,6 @@ body {
   color: #b91c1c;
 }
 
-/* ===== 페이지 레이아웃 ===== */
 .page {
   max-width: 520px;
   margin: 40px auto 100px;
@@ -146,7 +139,6 @@ body {
   position: relative;
 }
 
-/* 카드 상단 마스킹 테이프 느낌 */
 .page::before {
   content: "";
   position: absolute;
@@ -166,7 +158,6 @@ body {
   opacity: 0.9;
 }
 
-/* 제목 */
 .page-title {
   margin: 12px 0 22px;
   font-size: 22px;
@@ -174,12 +165,10 @@ body {
   color: var(--brand);
 }
 
-/* ===== 프로필 섹션 ===== */
 .section.profile {
   margin-bottom: 14px;
 }
 
-/* 라벨/헬퍼 */
 .field-label {
   margin: 0 auto 6px;
   width: var(--col-w);
@@ -189,13 +178,12 @@ body {
   color: #6b4b4e;
 }
 
-/* ===== 페이지 레이아웃 ===== */
 .layout {
-  min-height: calc(100vh - 58px); /* 헤더 높이 제외한 전체 높이 */
+  min-height: calc(100vh - 58px);
   display: flex;
-  align-items: center; /* 🔥 세로 가운데 정렬 */
-  justify-content: center; /* 🔥 가로 가운데 정렬 */
-  padding: 40px 16px; /* 화면 양옆 여백 */
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
 }
 
 .req {
@@ -221,7 +209,6 @@ body {
   margin-right: 4px;
 }
 
-/* ===== 아바타 업로더 (책표지 느낌) ===== */
 .avatar-uploader {
   width: 150px;
   height: 150px;
@@ -245,7 +232,6 @@ body {
   display: block;
 }
 
-/* ✅ 변경 버튼(배지)을 정 중앙에 오버레이 */
 .avatar-uploader .badge {
   position: absolute;
   top: 50%;
@@ -260,7 +246,6 @@ body {
   white-space: nowrap;
 }
 
-/* ===== 폼 ===== */
 .form {
   width: 100%;
   max-width: var(--col-w);
@@ -290,7 +275,6 @@ body {
   color: #4b3a3f;
 }
 
-/* 이름/닉네임 한 줄 입력 등 */
 .row {
   display: flex;
   gap: 8px;
@@ -321,7 +305,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* ===== 버튼 ===== */
 .btn {
   border: 0;
   border-radius: 10px;
@@ -329,12 +312,11 @@ body {
   cursor: pointer;
 }
 .brand a {
-  color: inherit; /* brand 색상 그대로 따라감 */
-  text-decoration: none; /* 밑줄 제거 */
-  display: inline-block; /* 정렬 안정화 */
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
 }
 
-/* 수정하기 (블록 버튼) */
 .btn.block {
   width: 100%;
   height: 40px;
@@ -357,7 +339,6 @@ body {
   transform: translateY(0) scale(0.985);
 }
 
-/* 회원 탈퇴 링크 */
 .link {
   margin: 10px 0 6px;
   background: transparent;
@@ -374,7 +355,6 @@ body {
   color: #7a1a1a;
 }
 
-/* 하단 '저장' 같은 pill 버튼이 있다면 */
 .btn.pill {
   height: 44px;
   padding: 0 26px;
@@ -398,7 +378,6 @@ body {
   transform: translateY(0) scale(0.985);
 }
 
-/* ===== 다크모드 ===== */
 @media (prefers-color-scheme: dark) {
   body {
     background: radial-gradient(

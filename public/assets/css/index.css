@@ -1,4 +1,3 @@
-/* 기본 설정 */
 *,
 *::before,
 *::after {
@@ -18,7 +17,6 @@ body {
     "Noto Sans KR", Arial, "맑은 고딕", system-ui, sans-serif;
 }
 
-/* 공용 색상 */
 :root {
   --brand: #5a2e3c;
   --border: #e6d5d0;
@@ -27,7 +25,6 @@ body {
   --primary-press: #b75a70;
 }
 
-/* ===== 헤더 ===== */
 .site-header {
   background: transparent;
   border-bottom: 1px solid #e8d5d7;
@@ -51,16 +48,14 @@ body {
   letter-spacing: 0.03em;
 }
 
-/* ===== 메인 레이아웃 ===== */
 .landing-layout {
   min-height: calc(100vh - 60px);
   display: flex;
   justify-content: center;
-  align-items: center; /* 화면 세로 가운데 배치 */
-  padding: 40px 16px; /* 이때는 아래 padding 조금 줄여도 됨 */
+  align-items: center;
+  padding: 40px 16px;
 }
 
-/* ===== 카드 ===== */
 .landing-card {
   width: 100%;
   max-width: 520px;
@@ -74,7 +69,6 @@ body {
   position: relative;
 }
 
-/* 마스킹테이프 느낌 */
 .landing-card::before {
   content: "";
   position: absolute;
@@ -94,7 +88,6 @@ body {
   );
 }
 
-/* ===== 텍스트 ===== */
 .landing-title {
   font-size: 24px;
   color: var(--brand);
@@ -109,7 +102,6 @@ body {
   line-height: 1.6;
 }
 
-/* ===== 특징 리스트 ===== */
 .features {
   list-style: none;
   padding: 0;
@@ -119,8 +111,6 @@ body {
   line-height: 1.8;
   text-align: left;
 }
-
-/* ===== CTA 버튼 ===== */
 
 .cta-area {
   display: flex;
@@ -157,7 +147,6 @@ body {
   transform: translateY(0) scale(0.985);
 }
 
-/* ===== 링크 버튼 ===== */
 .link-btn {
   background: transparent;
   border: 0;

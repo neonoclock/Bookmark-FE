@@ -1,6 +1,3 @@
-/* public/assets/css/post-create.css */
-
-/* 기본 구조 */
 *,
 *::before,
 *::after {
@@ -12,13 +9,12 @@ body {
 }
 body {
   margin: 0;
-  background: #faefef; /* 책갈피 테마 배경 */
+  background: #faefef;
   color: #2b251d;
   font-family: ui-sans-serif, -apple-system, "Apple SD Gothic Neo", Roboto,
     "Noto Sans KR", Arial, "맑은 고딕", system-ui, sans-serif;
 }
 
-/* 테마 변수 */
 :root {
   --brand: #5a2e3c;
   --border: #e6d5d0;
@@ -29,7 +25,6 @@ body {
   --w: 760px;
 }
 
-/* ===== 헤더 ===== */
 .site-header {
   border-bottom: 1px solid #e8d5d7;
   background: transparent;
@@ -63,7 +58,6 @@ body {
   color: #8c6b6e;
 }
 
-/* 아바타 + 드롭다운 (board와 통일) */
 .avatar-wrap {
   position: absolute;
   right: 16px;
@@ -118,16 +112,15 @@ body {
   background: #ffeef4;
 }
 
-/* ===== 레이아웃 ===== */
 .layout {
   max-width: var(--w);
-  min-height: calc(100vh - 72px); /* 헤더 제외 영역 기준 세로 중앙 */
+  min-height: calc(100vh - 72px);
   margin: 0 auto;
   padding: 40px 16px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* ⬅ 카드 세로 중앙 정렬 */
+  justify-content: center;
 }
 .page-title {
   margin: 10px 0 20px;
@@ -137,10 +130,9 @@ body {
   color: var(--brand);
 }
 
-/* ===== 글쓰기 영역 (노트 느낌) ===== */
 .write-form {
   width: 100%;
-  padding: 24px 6px 32px; /* ⬅ 아래 패딩 늘림 (10 → 32) */
+  padding: 24px 6px 32px;
   border-radius: 20px;
   background: rgba(253, 247, 246, 0.9);
   border: 1px solid rgba(230, 213, 208, 0.8);
@@ -149,7 +141,6 @@ body {
   overflow: hidden;
 }
 
-/* 왼쪽 노트 마진 라인 */
 .write-form::before {
   content: "";
   position: absolute;
@@ -160,13 +151,11 @@ body {
   background: rgba(226, 155, 173, 0.5);
 }
 
-/* 안쪽 내용 정렬 */
 .write-inner {
   max-width: 100%;
-  padding: 0 18px 4px 40px; /* 왼쪽은 노트 마진 고려 */
+  padding: 0 18px 4px 40px;
 }
 
-/* ===== 필드 ===== */
 .field {
   margin: 18px 0 26px;
 }
@@ -188,7 +177,6 @@ body {
   vertical-align: middle;
 }
 
-/* 입력 요소 – 언더라인 스타일 */
 input[type="text"],
 textarea {
   width: 100%;
@@ -216,7 +204,6 @@ textarea:focus {
   box-shadow: 0 2px 0 0 rgba(226, 155, 173, 0.45);
 }
 
-/* 헬퍼/에러 */
 .helper {
   margin: 4px 0 0;
   font-size: 12px;
@@ -230,7 +217,6 @@ textarea:focus {
   margin-right: 4px;
 }
 
-/* ===== 파일 업로드 ===== */
 .upload {
   display: flex;
   align-items: center;
@@ -267,17 +253,16 @@ textarea:focus {
   color: #9b7a7a;
 }
 
-/* ===== 제출 버튼 ===== */
 .actions {
   display: flex;
   justify-content: center;
-  margin-top: 22px; /* ⬅ 버튼 위 여백 살짝 증가 (18 → 22) */
+  margin-top: 22px;
 }
 
 .brand a {
-  color: inherit; /* 책갈피 색 그대로 사용 */
-  text-decoration: none; /* 밑줄 제거 */
-  display: inline-block; /* 줄 정렬 안정화 */
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
 }
 .btn {
   width: 60%;
@@ -305,7 +290,6 @@ textarea:focus {
   transform: translateY(0) scale(0.985);
 }
 
-/* ===== 다크모드 ===== */
 @media (prefers-color-scheme: dark) {
   body {
     background: radial-gradient(
