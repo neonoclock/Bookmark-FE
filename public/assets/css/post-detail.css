@@ -30,6 +30,10 @@ body {
   --radius: 22px;
   --w: 760px;
 }
+.brand a {
+  text-decoration: none;
+  color: inherit;
+}
 
 /* ===== Header ===== */
 .site-header {
