@@ -195,8 +195,6 @@ function renderPost() {
   renderPostActions(post);
 }
 
-/* --- 댓글 렌더링 --- */
-
 function renderComments() {
   const list = state.comments || [];
   const me = state.me;
@@ -508,8 +506,6 @@ async function loadComments() {
   }
 }
 
-/* --- 초기화 --- */
-
 document.addEventListener("DOMContentLoaded", async () => {
   state.postId = getPostIdFromURL();
   state.me = loadUserId();
@@ -535,6 +531,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  await loadPost();
-  await loadComments();
+  await Promise.all([loadPost(), loadComments()]);
 });
