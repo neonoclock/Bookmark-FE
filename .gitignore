@@ -1,0 +1,14 @@
+# Gradle 캐시
+.gradle/
+
+# 백엔드 빌드 결과물
+BE/build/
+BE/bin/
+
+# 프론트 의존성 폴더
+FE/node_modules/
+
+# IDE / OS 잡파일
+.idea/
+.vscode/
+.DS_Store
