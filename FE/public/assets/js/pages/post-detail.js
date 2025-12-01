@@ -1,7 +1,7 @@
 import { $, $$, on, setDisabled } from "../core/dom.js";
-import { loadUserId } from "../core/storage.js";
 import { PostsAPI } from "../api/posts.js";
 import { CommentsAPI } from "../api/comments.js";
+import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
 
 const state = {
@@ -87,6 +87,20 @@ function cacheDOM() {
   dom.commentsContainer = $(".comments");
 }
 
+async function loadMeIfLoggedIn() {
+  try {
+    const me = await UsersAPI.getMe();
+    state.me = {
+      id: me.userId ?? me.user_id ?? me.id,
+      ...me,
+    };
+    console.log("[POST-DETAIL] me:", state.me);
+  } catch (e) {
+    console.log("[POST-DETAIL] not logged in (loadMeIfLoggedIn)");
+    state.me = null;
+  }
+}
+
 function renderPostHeader(post) {
   if (dom.titleEl) {
     dom.titleEl.textContent = post.title ?? "(제목 없음)";
@@ -163,10 +177,10 @@ function renderPostStats(post) {
 function renderPostActions(post) {
   if (!dom.postActionsEl) return;
 
-  const me = state.me;
+  const meId = state.me?.id;
   const authorId = post.author_id || post.authorId || post.author?.id;
 
-  const isOwner = me && authorId && Number(me) === Number(authorId);
+  const isOwner = meId && authorId && Number(meId) === Number(authorId);
 
   dom.postActionsEl.innerHTML = "";
   if (!isOwner) return;
@@ -199,7 +213,7 @@ function renderPost() {
 
 function renderComments() {
   const list = state.comments || [];
-  const me = state.me;
+  const meId = state.me?.id;
 
   if (!dom.commentsContainer) return;
   dom.commentsContainer.innerHTML = "";
@@ -219,7 +233,7 @@ function renderComments() {
     const authorName =
       c.author_name || c.authorName || c.author?.nickname || "익명";
     const authorId = c.author_id || c.authorId || c.author?.id;
-    const isMine = me && authorId && Number(me) === Number(authorId);
+    const isMine = meId && authorId && Number(meId) === Number(authorId);
 
     const article = document.createElement("article");
     article.className = "comment";
@@ -305,6 +319,7 @@ async function handleDeletePost() {
   if (!state.postId) return;
   if (!state.me) {
     alert("로그인 후 이용해주세요.");
+    window.location.href = "./login.html";
     return;
   }
 
@@ -312,7 +327,7 @@ async function handleDeletePost() {
   if (!ok) return;
 
   try {
-    await PostsAPI.remove(state.postId, { userId: state.me });
+    await PostsAPI.remove(state.postId);
     alert("게시글이 삭제되었습니다.");
     window.location.href = "./board.html";
   } catch (e) {
@@ -325,6 +340,7 @@ async function handleToggleLike() {
   if (!state.postId) return;
   if (!state.me) {
     alert("좋아요는 로그인 후 이용 가능합니다.");
+    window.location.href = "./login.html";
     return;
   }
   if (state.isLiking) return;
@@ -337,11 +353,11 @@ async function handleToggleLike() {
 
   try {
     if (liked) {
-      await PostsAPI.unlike(state.postId, { userId: state.me });
+      await PostsAPI.unlike(state.postId);
       post.liked = false;
       post.likes = Math.max(0, (post.likes ?? 1) - 1);
     } else {
-      await PostsAPI.like(state.postId, { userId: state.me });
+      await PostsAPI.like(state.postId);
       post.liked = true;
       post.likes = (post.likes ?? 0) + 1;
     }
@@ -359,6 +375,7 @@ async function handleSubmitComment() {
   if (!state.postId) return;
   if (!state.me) {
     alert("로그인 후 댓글 작성이 가능합니다.");
+    window.location.href = "./login.html";
     return;
   }
   if (state.isSubmittingComment) return;
@@ -374,10 +391,7 @@ async function handleSubmitComment() {
   setDisabled(dom.commentSubmitBtn, true);
 
   try {
-    await CommentsAPI.create(state.postId, {
-      userId: state.me,
-      content,
-    });
+    await CommentsAPI.create(state.postId, { content });
     dom.commentTextarea.value = "";
     await loadComments();
   } catch (e) {
@@ -393,6 +407,7 @@ async function handleDeleteComment(commentId) {
   if (!state.postId) return;
   if (!state.me) {
     alert("로그인 후 이용해주세요.");
+    window.location.href = "./login.html";
     return;
   }
 
@@ -400,7 +415,7 @@ async function handleDeleteComment(commentId) {
   if (!ok) return;
 
   try {
-    await CommentsAPI.remove(state.postId, commentId, { userId: state.me });
+    await CommentsAPI.remove(state.postId, commentId);
     await loadComments();
   } catch (e) {
     console.error(e);
@@ -447,7 +462,6 @@ function handleEditComment(commentEl, commentId) {
     }
     try {
       await CommentsAPI.update(state.postId, commentId, {
-        userId: state.me,
         content: newContent,
       });
       await loadComments();
@@ -487,9 +501,10 @@ function handleEditComment(commentEl, commentId) {
 
 async function loadPost() {
   try {
-    const post = await PostsAPI.getDetail(state.postId, {
-      viewerId: state.me,
-    });
+    const viewerId = state.me?.id;
+    const params = viewerId ? { viewerId } : undefined;
+
+    const post = await PostsAPI.getDetail(state.postId, params);
     state.post = post;
     renderPost();
   } catch (e) {
@@ -511,7 +526,6 @@ async function loadComments() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   state.postId = getPostIdFromURL();
-  state.me = loadUserId();
 
   if (!state.postId) {
     alert("잘못된 접근입니다. 게시글 ID가 없습니다.");
@@ -523,6 +537,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await loadMyAvatar("[POST-DETAIL]");
   setupAvatarMenu();
+
+  await loadMeIfLoggedIn();
 
   if (dom.likeStatBtn) {
     on(dom.likeStatBtn, "click", handleToggleLike);

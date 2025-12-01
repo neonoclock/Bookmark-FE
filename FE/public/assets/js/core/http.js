@@ -6,7 +6,10 @@ async function request(path, options = {}) {
       "Content-Type": "application/json",
       ...(options.headers || {}),
     },
+    // options (method, body 등) 먼저 펼치고
     ...options,
+    // 🔥 모든 요청에 세션 쿠키(JSESSIONID) 포함
+    credentials: "include",
   });
 
   let raw;

@@ -1,24 +1,17 @@
 import { $, setHelper, clearFormHelpers, setDisabled } from "../core/dom.js";
-import { loadUserId, loadAuth, saveAuth, clearAuth } from "../core/storage.js";
+import { loadAuth, saveAuth, clearAuth } from "../core/storage.js";
 import { UsersAPI } from "../api/users.js";
 
 let currentProfileImage = null;
 
 async function loadProfile() {
-  const userId = loadUserId();
-  if (!userId) {
-    alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-    window.location.href = "./login.html";
-    return;
-  }
-
   const emailEl = $(".field .readonly");
   const nickInput = $("#nick");
   const avatarImg = $(".avatar-uploader img");
   const headerAvatarBtn = $("#avatarBtn");
 
   try {
-    const user = await UsersAPI.getUser(userId);
+    const user = await UsersAPI.getMe();
     console.log("[PROFILE] loaded user:", user);
 
     if (emailEl && user.email) {
@@ -47,8 +40,9 @@ async function loadProfile() {
       currentProfileImage = null;
     }
   } catch (e) {
-    console.error(e);
-    alert("회원 정보를 불러오지 못했습니다.");
+    console.error("[PROFILE] loadProfile error:", e);
+    alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+    window.location.href = "./login.html";
   }
 }
 
@@ -68,13 +62,6 @@ function validateForm() {
 }
 
 async function updateProfileCore() {
-  const userId = loadUserId();
-  if (!userId) {
-    alert("로그인이 필요합니다.");
-    window.location.href = "./login.html";
-    return false;
-  }
-
   if (!validateForm()) return false;
 
   const nickInput = $("#nick");
@@ -84,7 +71,7 @@ async function updateProfileCore() {
   try {
     if (submitBtn) setDisabled(submitBtn, true);
 
-    const result = await UsersAPI.updateProfile(userId, {
+    const result = await UsersAPI.updateProfile({
       nickname,
       profileImage: currentProfileImage,
     });
@@ -102,7 +89,7 @@ async function updateProfileCore() {
 
     return true;
   } catch (e) {
-    console.error(e);
+    console.error("[PROFILE] updateProfileCore error:", e);
     alert(e.message || "프로필 수정에 실패했습니다.");
     return false;
   } finally {
@@ -163,17 +150,16 @@ function setupAccountButtons() {
   const updateBtn = $(".btn.primary.block");
   const completeBtn = $(".btn.primary.pill");
 
-  const userId = loadUserId();
-
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
       if (!confirm("로그아웃 하시겠습니까?")) return;
       clearAuth();
+
       window.location.href = "./login.html";
     });
   }
 
-  if (deleteBtn && userId) {
+  if (deleteBtn) {
     deleteBtn.addEventListener("click", async () => {
       const ok = confirm(
         "정말 회원 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다."
@@ -182,12 +168,13 @@ function setupAccountButtons() {
 
       try {
         setDisabled(deleteBtn, true);
-        await UsersAPI.deleteUser(userId);
+
+        await UsersAPI.deleteUser();
         alert("회원 탈퇴가 완료되었습니다.");
         clearAuth();
         window.location.href = "./index.html";
       } catch (e) {
-        console.error(e);
+        console.error("[PROFILE] delete user error:", e);
         alert(e.message || "회원 탈퇴에 실패했습니다.");
       } finally {
         setDisabled(deleteBtn, false);

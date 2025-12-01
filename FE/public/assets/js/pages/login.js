@@ -5,7 +5,6 @@ import {
   setDisabled,
   on,
 } from "../core/dom.js";
-import { saveAuth } from "../core/storage.js";
 import { AuthAPI } from "../api/auth.js";
 
 function isValidEmail(v) {
@@ -75,17 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setDisabled(submitBtn, true);
 
     try {
-      const user = await AuthAPI.login(email, pw, false);
-
-      if (user?.id) {
-        saveAuth({
-          id: user.id,
-          nickname: user.nickname,
-          profileImage: user.profileImage ?? null,
-          email: user.email,
-          role: user.role,
-        });
-      }
+      await AuthAPI.login(email, pw);
 
       alert("로그인에 성공했습니다.");
 

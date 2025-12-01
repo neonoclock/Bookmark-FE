@@ -1,15 +1,13 @@
 import { GET, PATCH, DELETE } from "../core/http.js";
 
 export const UsersAPI = {
-  async getUser(userId) {
-    const res = await GET(`/api/v1/users/${userId}`);
+  async getMe() {
+    const raw = await GET(`/api/v1/users/me`);
 
-    const raw = res?.data ?? res;
-
-    console.log("[UsersAPI.getUser] raw:", raw);
+    console.log("[UsersAPI.getMe] raw:", raw);
 
     const user = {
-      userId: raw.user_id ?? raw.userId,
+      userId: raw.user_id ?? raw.userId ?? raw.id,
       email: raw.email,
       nickname: raw.nickname,
       profileImage: raw.profile_image ?? raw.profileImage ?? null,
@@ -21,14 +19,14 @@ export const UsersAPI = {
     return user;
   },
 
-  updateProfile(userId, { nickname, profileImage }) {
-    return PATCH(`/api/v1/users/${userId}/profile`, {
+  updateProfile({ nickname, profileImage }) {
+    return PATCH(`/api/v1/users/profile`, {
       nickname,
       profileImage: profileImage ?? null,
     });
   },
 
-  deleteUser(userId) {
-    return DELETE(`/api/v1/users/${userId}`);
+  deleteUser() {
+    return DELETE(`/api/v1/users`);
   },
 };

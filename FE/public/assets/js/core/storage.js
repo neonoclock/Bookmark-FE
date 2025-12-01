@@ -1,11 +1,8 @@
 const AUTH_KEY = "amumal_auth";
 
-export function saveAuth(authObject) {
-  if (!authObject || typeof authObject !== "object") {
-    console.error("saveAuth: invalid authObject", authObject);
-    return;
-  }
-  localStorage.setItem(AUTH_KEY, JSON.stringify(authObject));
+export function saveAuth({ email, nickname, profileImage, role }) {
+  const auth = { email, nickname, profileImage, role };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
 }
 
 export function loadAuth() {
@@ -25,6 +22,5 @@ export function clearAuth() {
 }
 
 export function loadUserId() {
-  const auth = loadAuth();
-  return auth?.id ?? null;
+  return null;
 }

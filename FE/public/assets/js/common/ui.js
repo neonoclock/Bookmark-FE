@@ -1,24 +1,20 @@
 import { $ } from "../core/dom.js";
-import { loadUserId, clearAuth } from "../core/storage.js";
+import { clearAuth } from "../core/storage.js";
 import { UsersAPI } from "../api/users.js";
 
 export async function loadMyAvatar(logPrefix = "") {
   const avatarBtn = $("#avatarBtn");
   if (!avatarBtn) return;
 
-  const userId = loadUserId();
-
-  if (!userId) {
-    avatarBtn.classList.remove("has-avatar");
-    avatarBtn.style.removeProperty("--avatar-url");
-    if (!avatarBtn.textContent) {
-      avatarBtn.textContent = "👩🏻‍💻";
-    }
-    return;
+  avatarBtn.dataset.loggedIn = "false";
+  avatarBtn.classList.remove("has-avatar");
+  avatarBtn.style.removeProperty("--avatar-url");
+  if (!avatarBtn.textContent) {
+    avatarBtn.textContent = "👩🏻‍💻";
   }
 
   try {
-    const user = await UsersAPI.getUser(userId);
+    const user = await UsersAPI.getMe();
 
     const prefix = logPrefix ? ` ${logPrefix}` : "";
     console.log(`[AVATAR${prefix}] normalized user:`, user);
@@ -26,11 +22,6 @@ export async function loadMyAvatar(logPrefix = "") {
     const profileImage = user.profileImage;
 
     if (!profileImage) {
-      avatarBtn.classList.remove("has-avatar");
-      avatarBtn.style.removeProperty("--avatar-url");
-      if (!avatarBtn.textContent) {
-        avatarBtn.textContent = "👩🏻‍💻";
-      }
       console.log(`[AVATAR${prefix}] profileImage 없음, 기본 아바타 사용`);
       return;
     }
@@ -38,12 +29,14 @@ export async function loadMyAvatar(logPrefix = "") {
     avatarBtn.style.setProperty("--avatar-url", `url(${profileImage})`);
     avatarBtn.classList.add("has-avatar");
     avatarBtn.textContent = "";
+    avatarBtn.dataset.loggedIn = "true";
 
     console.log(`[AVATAR${prefix}] 프로필 이미지 적용 완료:`, profileImage);
   } catch (err) {
     const prefix = logPrefix ? ` ${logPrefix}` : "";
     console.error(`[AVATAR${prefix}] 내 프로필(아바타) 불러오기 실패:`, err);
 
+    avatarBtn.dataset.loggedIn = "false";
     avatarBtn.classList.remove("has-avatar");
     avatarBtn.style.removeProperty("--avatar-url");
     if (!avatarBtn.textContent) {
@@ -67,8 +60,9 @@ export function setupAvatarMenu() {
 
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const userId = loadUserId();
-    if (!userId) {
+
+    const isLoggedIn = btn.dataset.loggedIn === "true";
+    if (!isLoggedIn) {
       window.location.href = "./login.html";
       return;
     }

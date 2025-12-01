@@ -1,15 +1,24 @@
 import { $, setHelper, clearFormHelpers, setDisabled } from "../core/dom.js";
 import { PATCH } from "../core/http.js";
-import { loadUserId } from "../core/storage.js";
+import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const userId = loadUserId();
-  if (!userId) {
+async function ensureLogin() {
+  try {
+    const me = await UsersAPI.getMe();
+    console.log("[PASSWORD] me:", me);
+    return me;
+  } catch (e) {
+    console.warn("[PASSWORD] not logged in:", e);
     alert("로그인이 필요합니다.");
     location.href = "./login.html";
-    return;
+    return null;
   }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const me = await ensureLogin();
+  if (!me) return;
 
   loadMyAvatar("[PASSWORD]");
   setupAvatarMenu();
@@ -74,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      await PATCH(`/api/v1/users/${userId}/password`, {
+      await PATCH(`/api/v1/users/password`, {
         oldPassword,
         newPassword,
         newPasswordCheck,

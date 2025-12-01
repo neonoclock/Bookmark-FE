@@ -6,44 +6,36 @@ export const PostsAPI = {
     return GET(`/api/v1/posts?${qs}`);
   },
 
-  getDetail(postId, { viewerId } = {}) {
-    const qs = toQueryString({ viewerId });
-    const suffix = qs ? `?${qs}` : "";
-    return GET(`/api/v1/posts/${postId}${suffix}`);
+  getDetail(postId) {
+    return GET(`/api/v1/posts/${postId}`);
   },
 
-  create({ userId, title, content, imageUrl }) {
-    const qs = toQueryString({ userId });
-    return POST(`/api/v1/posts?${qs}`, {
+  create({ title, content, imageUrl }) {
+    return POST(`/api/v1/posts`, {
       title,
       content,
       image_url: imageUrl ?? null,
     });
   },
 
-  update(postId, { userId, title, content, imageUrl }) {
-    const qs = toQueryString({ userId });
-    return PATCH(`/api/v1/posts/${postId}?${qs}`, {
+  update(postId, { title, content, imageUrl }) {
+    return PATCH(`/api/v1/posts/${postId}`, {
       title,
       content,
       image_url: imageUrl ?? null,
     });
   },
 
-  remove(postId, { userId }) {
-    const qs = toQueryString({ userId });
-    return DELETE(`/api/v1/posts/${postId}?${qs}`);
+  remove(postId) {
+    return DELETE(`/api/v1/posts/${postId}`);
   },
 
-  like(postId, { userId }) {
-    const qs = toQueryString({ userId });
-
-    return POST(`/api/v1/posts/${postId}/like?${qs}`, {});
+  like(postId) {
+    return POST(`/api/v1/posts/${postId}/like`, {});
   },
 
-  unlike(postId, { userId }) {
-    const qs = toQueryString({ userId });
-    return DELETE(`/api/v1/posts/${postId}/like?${qs}`);
+  unlike(postId) {
+    return DELETE(`/api/v1/posts/${postId}/like`);
   },
 
   search({

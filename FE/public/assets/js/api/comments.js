@@ -1,29 +1,23 @@
-import { GET, POST, PATCH, DELETE, toQueryString } from "../core/http.js";
+import { GET, POST, PATCH, DELETE } from "../core/http.js";
 
 export const CommentsAPI = {
   getList(postId) {
     return GET(`/api/v1/posts/${postId}/comments`);
   },
 
-  create(postId, { userId, content }) {
-    const qs = toQueryString({ userId });
-
-    return POST(`/api/v1/posts/${postId}/comments?${qs}`, {
+  create(postId, { content }) {
+    return POST(`/api/v1/posts/${postId}/comments`, {
       content,
     });
   },
 
-  update(postId, commentId, { userId, content }) {
-    const qs = toQueryString({ userId });
-
-    return PATCH(`/api/v1/posts/${postId}/comments/${commentId}?${qs}`, {
+  update(postId, commentId, { content }) {
+    return PATCH(`/api/v1/posts/${postId}/comments/${commentId}`, {
       content,
     });
   },
 
-  remove(postId, commentId, { userId }) {
-    const qs = toQueryString({ userId });
-
-    return DELETE(`/api/v1/posts/${postId}/comments/${commentId}?${qs}`);
+  remove(postId, commentId) {
+    return DELETE(`/api/v1/posts/${postId}/comments/${commentId}`);
   },
 };

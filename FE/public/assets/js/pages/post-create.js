@@ -1,6 +1,6 @@
 import { $, clearFormHelpers, setDisabled, on } from "../core/dom.js";
-import { loadUserId } from "../core/storage.js";
 import { PostsAPI } from "../api/posts.js";
+import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
 
 let imageDataUrl = null;
@@ -52,14 +52,22 @@ function readImageFile(file) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const userId = loadUserId();
-
-  if (!userId) {
+async function ensureLogin() {
+  try {
+    const me = await UsersAPI.getMe();
+    console.log("[POST-CREATE] me:", me);
+    return me;
+  } catch (e) {
+    console.warn("[POST-CREATE] not logged in:", e);
     alert("로그인 후 이용 가능한 페이지입니다.");
     window.location.href = "./login.html";
-    return;
+    return null;
   }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const me = await ensureLogin();
+  if (!me) return;
 
   const form = $(".write-form");
   const titleEl = $("#title");
@@ -130,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const data = await PostsAPI.create({
-          userId,
           title,
           content,
           imageUrl: imageDataUrl,

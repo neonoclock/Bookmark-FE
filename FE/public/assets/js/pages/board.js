@@ -1,6 +1,6 @@
 import { $, on } from "../core/dom.js";
-import { loadUserId } from "../core/storage.js";
 import { PostsAPI } from "../api/posts.js";
+import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
 
 function escapeHtml(str = "") {
@@ -117,14 +117,15 @@ document.addEventListener("DOMContentLoaded", () => {
   setupAvatarMenu();
 
   if (writeBtn) {
-    on(writeBtn, "click", () => {
-      const userId = loadUserId();
-      if (!userId) {
+    on(writeBtn, "click", async () => {
+      try {
+        await UsersAPI.getMe();
+        window.location.href = "./post-create.html";
+      } catch (err) {
+        console.warn("[BOARD] 글쓰기 전 로그인 확인 실패:", err);
         alert("게시글 작성은 로그인 후 이용 가능합니다.");
         window.location.href = "./login.html";
-        return;
       }
-      window.location.href = "./post-create.html";
     });
   }
 

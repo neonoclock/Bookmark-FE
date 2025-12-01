@@ -5,14 +5,13 @@ import {
   setDisabled,
   on,
 } from "../core/dom.js";
-import { saveAuth } from "../core/storage.js";
 import { AuthAPI } from "../api/auth.js";
 
 function isValidEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
-function validate({ email, pw, pw2, nick, avatarSelected }) {
+function validate({ email, pw, pw2, nick }) {
   let valid = true;
 
   if (!email) {
@@ -69,6 +68,9 @@ function handleServerError(message, { emailEl, pwEl, pw2El, nickEl }) {
       break;
     case "password_mismatch":
       setHelper(pw2El, "비밀번호가 서로 일치하지 않습니다.", true);
+      break;
+    case "이메일이 이미 존재합니다.":
+      setHelper(emailEl, "이미 사용 중인 이메일입니다.", true);
       break;
     default:
       alert(message || "회원가입 중 오류가 발생했습니다.");
@@ -169,26 +171,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const pw = pwEl.value;
     const pw2 = pw2El.value;
     const nick = nickEl.value.trim();
-    const avatarSelected = !!avatarDataUrl;
 
-    const isValid = validate({ email, pw, pw2, nick, avatarSelected });
+    const isValid = validate({ email, pw, pw2, nick });
     if (!isValid) return;
 
     setDisabled(submitBtn, true);
 
     try {
-      const data = await AuthAPI.signup({
+      await AuthAPI.signup({
         email,
         password: pw,
         passwordCheck: pw2,
         nickname: nick,
         profileImage: avatarDataUrl,
       });
-
-      const userId = data?.id;
-      if (userId) {
-        saveAuth({ id: userId });
-      }
 
       alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
       window.location.href = "./login.html";

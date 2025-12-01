@@ -5,8 +5,8 @@ import {
   clearFormHelpers,
   setDisabled,
 } from "../core/dom.js";
-import { loadUserId } from "../core/storage.js";
 import { PostsAPI } from "../api/posts.js";
+import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
 
 let currentImageDataUrl = null;
@@ -17,14 +17,16 @@ function getPostIdFromQuery() {
   return id ? Number(id) : null;
 }
 
-function ensureLogin() {
-  const userId = loadUserId();
-  if (!userId) {
+async function ensureLogin() {
+  try {
+    const me = await UsersAPI.getMe();
+    return me;
+  } catch (err) {
+    console.warn("[POST-EDIT] ensureLogin 실패:", err);
     alert("로그인 후 이용해주세요.");
     window.location.href = "./login.html";
     return null;
   }
-  return userId;
 }
 
 function validateForm(titleEl, contentEl, formEl) {
@@ -81,7 +83,7 @@ function setupFileInput(fileInput, fileNameEl) {
   });
 }
 
-async function loadPostDetail(postId, userId) {
+async function loadPostDetail(postId, me) {
   const titleEl = $("#title");
   const contentEl = $("#content");
   const fileNameEl = document.querySelector(".upload .file-name");
@@ -96,7 +98,9 @@ async function loadPostDetail(postId, userId) {
     if (submitBtn) setDisabled(submitBtn, true);
 
     console.log("[REQ] 게시글 상세 조회:", postId);
-    const detail = await PostsAPI.getDetail(postId, { viewerId: userId });
+    const detail = await PostsAPI.getDetail(postId, {
+      viewerId: me?.userId,
+    });
     console.log("[RES] 게시글 상세:", detail);
 
     titleEl.value = detail.title ?? "";
@@ -140,8 +144,8 @@ async function handleSubmit(e) {
     return;
   }
 
-  const userId = ensureLogin();
-  if (!userId) return;
+  const me = await ensureLogin();
+  if (!me) return;
 
   if (!validateForm(titleEl, contentEl, formEl)) {
     return;
@@ -156,14 +160,12 @@ async function handleSubmit(e) {
 
     console.log("[REQ] 게시글 수정 요청:", {
       postId,
-      userId,
       title,
       content,
       imageUrlLength: imageUrl ? imageUrl.length : 0,
     });
 
     const updated = await PostsAPI.update(postId, {
-      userId,
       title,
       content,
       imageUrl,
@@ -181,7 +183,7 @@ async function handleSubmit(e) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   console.log("[PAGE] post-edit loaded");
 
   const postId = getPostIdFromQuery();
@@ -191,8 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const userId = ensureLogin();
-  if (!userId) return;
+  const me = await ensureLogin();
+  if (!me) return;
 
   loadMyAvatar("[POST-EDIT]");
   setupAvatarMenu();
@@ -201,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const fileNameEl = document.querySelector(".upload .file-name");
   setupFileInput(fileInput, fileNameEl);
 
-  loadPostDetail(postId, userId);
+  await loadPostDetail(postId, me);
 
   const formEl = $(".edit-form");
   if (formEl) {
