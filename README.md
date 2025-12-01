@@ -96,9 +96,3 @@ Spring Boot 기반의 Backend API와 연동되어 작동합니다.
 - 모바일에서도 보기 좋은 기본 반응형 구조  
 
 ---
-
-## 🚀 로컬 실행 방법
-
-### 1) 레포지토리 클론
-```bash
-git clone https://github.com/사용자명/Bookmark-FE.git
