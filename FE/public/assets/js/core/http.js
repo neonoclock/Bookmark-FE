@@ -1,15 +1,15 @@
 const BASE_URL = "http://localhost:8080";
 
 async function request(path, options = {}) {
+  const { headers, ...rest } = options;
+
   const res = await fetch(BASE_URL + path, {
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers || {}),
+      ...(headers || {}),
     },
-    // options (method, body 등) 먼저 펼치고
-    ...options,
-    // 🔥 모든 요청에 세션 쿠키(JSESSIONID) 포함
-    credentials: "include",
+    ...rest,
   });
 
   let raw;

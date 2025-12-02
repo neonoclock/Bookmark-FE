@@ -51,14 +51,21 @@ function handleServerError(message, { emailEl, pwEl }) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = $(".auth-form");
+  if (!form) {
+    console.warn("[LOGIN] .auth-form 요소를 찾지 못했습니다.");
+    return;
+  }
+
   const emailEl = $("#email");
   const pwEl = $("#password");
   const submitBtn = $(".btn.primary");
   const signupLink = $(".link-btn");
 
-  on(signupLink, "click", () => {
-    window.location.href = "./signup.html";
-  });
+  if (signupLink) {
+    on(signupLink, "click", () => {
+      window.location.href = "./signup.html";
+    });
+  }
 
   on(form, "submit", async (e) => {
     e.preventDefault();
@@ -74,10 +81,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setDisabled(submitBtn, true);
 
     try {
-      await AuthAPI.login(email, pw);
+      const user = await AuthAPI.login(email, pw);
+      console.log("[LOGIN] success, user:", user);
 
       alert("로그인에 성공했습니다.");
-
       window.location.href = "./board.html";
     } catch (err) {
       console.error("login error:", err);

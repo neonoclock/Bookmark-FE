@@ -7,7 +7,7 @@ export const AuthAPI = {
       password,
       password_check: passwordCheck,
       nickname,
-      profile_image: profileImage ?? null,
+      profileImage: profileImage ?? null,
       userRole: null,
     });
   },

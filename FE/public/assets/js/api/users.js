@@ -7,13 +7,13 @@ export const UsersAPI = {
     console.log("[UsersAPI.getMe] raw:", raw);
 
     const user = {
-      userId: raw.user_id ?? raw.userId ?? raw.id,
+      userId: raw.user_id ?? raw.userId ?? raw.id ?? null,
       email: raw.email,
       nickname: raw.nickname,
       profileImage: raw.profile_image ?? raw.profileImage ?? null,
-      role: raw.role ?? raw.user_role,
-      createdAt: raw.created_at ?? raw.createdAt,
-      updatedAt: raw.updated_at ?? raw.updatedAt,
+      role: raw.role ?? raw.user_role ?? null,
+      createdAt: raw.created_at ?? raw.createdAt ?? null,
+      updatedAt: raw.updated_at ?? raw.updatedAt ?? null,
     };
 
     return user;

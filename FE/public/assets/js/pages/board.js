@@ -1,4 +1,5 @@
 import { $, on } from "../core/dom.js";
+import { saveAuth } from "../core/storage.js";
 import { PostsAPI } from "../api/posts.js";
 import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
@@ -10,6 +11,34 @@ function escapeHtml(str = "") {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+async function ensureAuthFromServer() {
+  try {
+    const raw = await UsersAPI.getMe();
+    if (!raw) return null;
+
+    const me = {
+      id: raw.userId ?? raw.user_id ?? raw.id,
+      email: raw.email,
+      nickname: raw.nickname,
+      profileImage: raw.profileImage ?? raw.profile_image ?? null,
+      role: raw.role ?? raw.user_role ?? null,
+    };
+
+    if (me.id) {
+      saveAuth(me);
+      console.log("[BOARD] 세션 사용자 동기화:", me);
+      return me;
+    }
+    return null;
+  } catch (err) {
+    console.warn(
+      "[BOARD] ensureAuthFromServer 실패 (로그인 안 되어 있을 수 있음):",
+      err
+    );
+    return null;
+  }
 }
 
 function createPostElement(post) {
@@ -107,25 +136,27 @@ async function loadPosts() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const writeBtn = $(".intro .btn.primary");
   const boardEl = $(".board");
 
-  loadPosts();
+  await ensureAuthFromServer();
 
+  loadPosts();
   loadMyAvatar("[BOARD]");
   setupAvatarMenu();
 
   if (writeBtn) {
     on(writeBtn, "click", async () => {
-      try {
-        await UsersAPI.getMe();
-        window.location.href = "./post-create.html";
-      } catch (err) {
-        console.warn("[BOARD] 글쓰기 전 로그인 확인 실패:", err);
+      const me = await ensureAuthFromServer();
+
+      if (!me) {
         alert("게시글 작성은 로그인 후 이용 가능합니다.");
         window.location.href = "./login.html";
+        return;
       }
+
+      window.location.href = "./post-create.html";
     });
   }
 
