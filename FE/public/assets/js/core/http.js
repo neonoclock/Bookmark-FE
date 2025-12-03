@@ -1,12 +1,21 @@
+import { loadAccessToken } from "./storage.js";
+
 const BASE_URL = "http://localhost:8080";
 
 async function request(path, options = {}) {
   const { headers, ...rest } = options;
 
+  const token = loadAccessToken();
+  const authHeaders = {};
+
+  if (token) {
+    authHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(BASE_URL + path, {
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders,
       ...(headers || {}),
     },
     ...rest,

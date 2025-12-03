@@ -24,7 +24,6 @@ export async function loadMyAvatar(logPrefix = "") {
 
   try {
     const me = await UsersAPI.getMe();
-
     const auth = loadAuth();
 
     console.log(`[AVATAR${prefix}] /me:`, me, "auth:", auth);
@@ -52,9 +51,7 @@ export async function loadMyAvatar(logPrefix = "") {
       role: me?.role ?? me?.user_role ?? auth?.role ?? null,
     };
 
-    if (merged.id) {
-      saveAuth(merged);
-    }
+    saveAuth(merged);
 
     const profileImage = merged.profileImage;
 
@@ -74,7 +71,6 @@ export async function loadMyAvatar(logPrefix = "") {
     );
   } catch (err) {
     console.error(`[AVATAR${prefix}] 내 프로필(아바타) 불러오기 실패:`, err);
-
     setGuestAvatar(avatarBtn);
   }
 }
@@ -137,7 +133,6 @@ export function setupAvatarMenu() {
       if (!confirm("로그아웃 하시겠습니까?")) return;
 
       clearAuth();
-
       window.location.href = "./login.html";
     });
   }
