@@ -1,5 +1,5 @@
 import { GET, POST, PATCH, DELETE } from "../core/http.js";
-import { saveAuth } from "../core/storage.js";
+import { saveAuth, loadRefreshToken } from "../core/storage.js";
 
 export const AuthAPI = {
   signup({ email, password, passwordCheck, nickname, profileImage }) {
@@ -24,6 +24,28 @@ export const AuthAPI = {
       id: data.user_id ?? data.id ?? null,
       email,
       accessToken: data.access_token,
+      refreshToken: data.refresh_token ?? null,
+      tokenType: data.token_type,
+      expiresIn: data.expires_in,
+    });
+
+    return data;
+  },
+
+  async refresh() {
+    const refreshToken = loadRefreshToken();
+    if (!refreshToken) {
+      throw new Error("리프레시 토큰이 없습니다.");
+    }
+
+    const data = await POST("/api/v1/users/refresh", {
+      refresh_token: refreshToken,
+    });
+
+    saveAuth({
+      id: data.user_id ?? data.id ?? null,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token ?? null,
       tokenType: data.token_type,
       expiresIn: data.expires_in,
     });

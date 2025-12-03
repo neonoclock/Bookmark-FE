@@ -32,3 +32,8 @@ export function loadAccessToken() {
   const auth = loadAuth();
   return auth?.accessToken ?? null;
 }
+
+export function loadRefreshToken() {
+  const auth = loadAuth();
+  return auth?.refreshToken ?? null;
+}
