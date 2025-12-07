@@ -11,6 +11,56 @@ import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
 
 let currentImageDataUrl = null;
 
+function h(type, props, ...children) {
+  const flatChildren = children
+    .flat()
+    .filter((c) => c !== null && c !== false && c !== undefined);
+  return {
+    type,
+    props: props || {},
+    children: flatChildren,
+  };
+}
+
+function createElement(vnode) {
+  if (typeof vnode === "string" || typeof vnode === "number") {
+    return document.createTextNode(String(vnode));
+  }
+
+  const el = document.createElement(vnode.type);
+  const props = vnode.props || {};
+
+  for (const key in props) {
+    const value = props[key];
+    if (key === "class") {
+      el.className = value;
+    } else if (key === "dataset" && value && typeof value === "object") {
+      Object.assign(el.dataset, value);
+    } else {
+      el.setAttribute(key, value);
+    }
+  }
+
+  vnode.children.forEach((child) => {
+    el.appendChild(createElement(child));
+  });
+
+  return el;
+}
+
+function render(vnode, container) {
+  container.innerHTML = "";
+  if (!vnode) return;
+
+  if (Array.isArray(vnode)) {
+    vnode.forEach((child) => {
+      container.appendChild(createElement(child));
+    });
+  } else {
+    container.appendChild(createElement(vnode));
+  }
+}
+
 function getPostIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get("postId");
@@ -81,6 +131,73 @@ function setupFileInput(fileInput, fileNameEl) {
     };
     reader.readAsDataURL(file);
   });
+}
+
+function AppView() {
+  return [
+    h("h2", { class: "page-title" }, "게시글 수정"),
+
+    h(
+      "form",
+      { class: "edit-form", autocomplete: "off" },
+      h(
+        "div",
+        { class: "edit-inner" },
+
+        h(
+          "div",
+          { class: "field" },
+          h(
+            "label",
+            { class: "label", for: "title" },
+            "제목",
+            h("span", { class: "req" }, "")
+          ),
+          h("input", {
+            id: "title",
+            type: "text",
+            placeholder: "제목을 입력해주세요.",
+          }),
+          h("p", { class: "helper" }, "")
+        ),
+
+        h(
+          "div",
+          { class: "field" },
+          h(
+            "label",
+            { class: "label", for: "content" },
+            "내용",
+            h("span", { class: "req" }, "")
+          ),
+          h("textarea", {
+            id: "content",
+            placeholder: "내용을 입력해주세요.",
+          }),
+          h("p", { class: "helper" }, "")
+        ),
+
+        h(
+          "div",
+          { class: "upload" },
+          h("label", { class: "label inline" }, "이미지"),
+          h(
+            "label",
+            { class: "file" },
+            h("input", { type: "file", accept: "image/*" }),
+            h("span", { class: "file-btn" }, "파일 선택"),
+            h("span", { class: "file-name" }, "선택된 파일 없음")
+          )
+        ),
+
+        h(
+          "div",
+          { class: "actions" },
+          h("button", { class: "btn primary", type: "submit" }, "수정 완료")
+        )
+      )
+    ),
+  ];
 }
 
 async function loadPostDetail(postId, me) {
@@ -198,6 +315,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   loadMyAvatar("[POST-EDIT]");
   setupAvatarMenu();
+
+  const layout = document.querySelector("main.layout");
+  if (layout) {
+    render(AppView(), layout);
+  }
 
   const fileInput = document.querySelector(".upload input[type=file]");
   const fileNameEl = document.querySelector(".upload .file-name");
