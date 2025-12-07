@@ -4,13 +4,124 @@ import { PostsAPI } from "../api/posts.js";
 import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
 
-function escapeHtml(str = "") {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+function h(type, props, ...children) {
+  const flatChildren = children
+    .flat()
+    .filter((c) => c !== null && c !== false && c !== undefined);
+  return {
+    type,
+    props: props || {},
+    children: flatChildren,
+  };
+}
+
+function createElement(vnode) {
+  if (typeof vnode === "string" || typeof vnode === "number") {
+    return document.createTextNode(String(vnode));
+  }
+
+  const el = document.createElement(vnode.type);
+  const props = vnode.props || {};
+
+  for (const key in props) {
+    const value = props[key];
+    if (key === "class") {
+      el.className = value;
+    } else if (key === "dataset" && value && typeof value === "object") {
+      Object.assign(el.dataset, value);
+    } else {
+      el.setAttribute(key, value);
+    }
+  }
+
+  vnode.children.forEach((child) => {
+    el.appendChild(createElement(child));
+  });
+
+  return el;
+}
+
+function render(vnode, container) {
+  container.innerHTML = "";
+  if (!vnode) return;
+  container.appendChild(createElement(vnode));
+}
+
+const state = {
+  posts: [],
+  loading: false,
+  error: null,
+};
+
+function PostCard(post) {
+  const {
+    id,
+    title,
+    authorNickname,
+    likes,
+    views,
+    createdAt,
+    commentsCount,
+    authorProfileImage,
+  } = post;
+
+  return h(
+    "article",
+    {
+      class: "post",
+      "data-post-id": id,
+    },
+    h(
+      "div",
+      { class: "post-head" },
+      h("h2", { class: "post-title" }, title || "(제목 없음)"),
+      h("time", { class: "post-date" }, createdAt || "")
+    ),
+    h(
+      "div",
+      { class: "post-meta" },
+      h("span", null, `좋아요 ${likes ?? 0}`),
+      h("span", null, `댓글 ${commentsCount ?? 0}`),
+      h("span", null, `조회수 ${views ?? 0}`)
+    ),
+    h("div", { class: "post-divider" }),
+    h(
+      "footer",
+      { class: "post-footer" },
+      h("span", {
+        class: "author-avatar" + (authorProfileImage ? " has-avatar" : ""),
+        "aria-hidden": "true",
+        style: authorProfileImage
+          ? `--avatar-url: url(${authorProfileImage})`
+          : "",
+      }),
+      h("span", { class: "author-name" }, authorNickname || "익명")
+    )
+  );
+}
+
+function BoardView(state) {
+  if (state.loading) {
+    return h("p", { class: "empty" }, "게시글을 불러오는 중입니다...");
+  }
+
+  if (state.error) {
+    return h(
+      "p",
+      { class: "empty" },
+      "게시글을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+    );
+  }
+
+  if (!state.posts.length) {
+    return h("p", { class: "empty" }, "아직 작성된 게시글이 없습니다.");
+  }
+
+  return h(
+    "div",
+    null,
+    state.posts.map((post) => PostCard(post))
+  );
 }
 
 async function ensureAuthFromServer() {
@@ -41,56 +152,12 @@ async function ensureAuthFromServer() {
   }
 }
 
-function createPostElement(post) {
-  const {
-    id,
-    title,
-    authorNickname,
-    likes,
-    views,
-    createdAt,
-    commentsCount,
-    authorProfileImage,
-  } = post;
+async function loadPosts(boardRoot) {
+  if (!boardRoot) return;
 
-  const article = document.createElement("article");
-  article.className = "post";
-  article.dataset.postId = id;
-
-  article.innerHTML = `
-    <div class="post-head">
-      <h2 class="post-title">${escapeHtml(title)}</h2>
-      <time class="post-date">${escapeHtml(createdAt || "")}</time>
-    </div>
-
-    <div class="post-meta">
-      <span>좋아요 ${likes ?? 0}</span>
-      <span>댓글 ${commentsCount ?? 0}</span>
-      <span>조회수 ${views ?? 0}</span>
-    </div>
-
-    <div class="post-divider"></div>
-
-    <footer class="post-footer">
-      <span class="author-avatar" aria-hidden="true"></span>
-      <span class="author-name">${escapeHtml(authorNickname || "익명")}</span>
-    </footer>
-  `;
-
-  const avatarEl = article.querySelector(".author-avatar");
-  if (avatarEl && authorProfileImage) {
-    avatarEl.style.setProperty("--avatar-url", `url(${authorProfileImage})`);
-    avatarEl.classList.add("has-avatar");
-  }
-
-  return article;
-}
-
-async function loadPosts() {
-  const boardEl = $(".board");
-  if (!boardEl) return;
-
-  boardEl.innerHTML = "";
+  state.loading = true;
+  state.error = null;
+  render(BoardView(state), boardRoot);
 
   try {
     const res = await PostsAPI.getList({
@@ -104,35 +171,30 @@ async function loadPosts() {
     const rawList = res?.items ?? [];
 
     if (!Array.isArray(rawList) || rawList.length === 0) {
-      const empty = document.createElement("p");
-      empty.textContent = "아직 작성된 게시글이 없습니다.";
-      empty.className = "empty";
-      boardEl.appendChild(empty);
+      state.posts = [];
+      state.loading = false;
+      render(BoardView(state), boardRoot);
       return;
     }
 
-    rawList.forEach((post) => {
-      const normalized = {
-        id: post.post_id,
-        title: post.title,
-        authorNickname: post.author_name,
-        likes: post.likes ?? 0,
-        views: post.views ?? 0,
-        createdAt: post.created_at,
-        commentsCount: post.comment_count ?? post.commentsCount ?? 0,
-        authorProfileImage: post.author_profile_image ?? null,
-      };
+    state.posts = rawList.map((post) => ({
+      id: post.post_id,
+      title: post.title,
+      authorNickname: post.author_name,
+      likes: post.likes ?? 0,
+      views: post.views ?? 0,
+      createdAt: post.created_at,
+      commentsCount: post.comment_count ?? post.commentsCount ?? 0,
+      authorProfileImage: post.author_profile_image ?? null,
+    }));
 
-      const card = createPostElement(normalized);
-      boardEl.appendChild(card);
-    });
+    state.loading = false;
+    render(BoardView(state), boardRoot);
   } catch (err) {
     console.error("게시글 목록 조회 실패:", err);
-    const errorMsg = document.createElement("p");
-    errorMsg.textContent =
-      "게시글을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-    errorMsg.className = "empty";
-    $(".board")?.appendChild(errorMsg);
+    state.error = err?.message || "게시글을 불러오는 중 오류가 발생했습니다.";
+    state.loading = false;
+    render(BoardView(state), boardRoot);
   }
 }
 
@@ -142,9 +204,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await ensureAuthFromServer();
 
-  loadPosts();
   loadMyAvatar("[BOARD]");
   setupAvatarMenu();
+
+  if (boardEl) {
+    await loadPosts(boardEl);
+  }
 
   if (writeBtn) {
     on(writeBtn, "click", async () => {
