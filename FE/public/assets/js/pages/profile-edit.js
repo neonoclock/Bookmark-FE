@@ -4,10 +4,130 @@ import { UsersAPI } from "../api/users.js";
 
 let currentProfileImage = null;
 
+function h(type, props, ...children) {
+  const flatChildren = children
+    .flat()
+    .filter((c) => c !== null && c !== false && c !== undefined);
+  return {
+    type,
+    props: props || {},
+    children: flatChildren,
+  };
+}
+
+function createElement(vnode) {
+  if (typeof vnode === "string" || typeof vnode === "number") {
+    return document.createTextNode(String(vnode));
+  }
+
+  const el = document.createElement(vnode.type);
+  const props = vnode.props || {};
+
+  for (const key in props) {
+    const value = props[key];
+    if (key === "class") {
+      el.className = value;
+    } else if (key === "dataset" && value && typeof value === "object") {
+      Object.assign(el.dataset, value);
+    } else {
+      el.setAttribute(key, value);
+    }
+  }
+
+  vnode.children.forEach((child) => {
+    el.appendChild(createElement(child));
+  });
+
+  return el;
+}
+
+function render(vnode, container) {
+  container.innerHTML = "";
+  if (!vnode) return;
+
+  if (Array.isArray(vnode)) {
+    vnode.forEach((child) => {
+      container.appendChild(createElement(child));
+    });
+  } else {
+    container.appendChild(createElement(vnode));
+  }
+}
+
+function AppView() {
+  return h(
+    "section",
+    { class: "page" },
+    h("h2", { class: "page-title" }, "회원정보수정"),
+
+    h(
+      "section",
+      { class: "section profile" },
+      h(
+        "p",
+        { class: "field-label" },
+        "프로필 사진 ",
+        h("span", { class: "req" }, "")
+      ),
+      h(
+        "p",
+        { class: "helper error" },
+        h("span", { class: "star" }, ""),
+        " helper text"
+      ),
+      h(
+        "label",
+        { class: "avatar-uploader" },
+        h("input", {
+          type: "file",
+          accept: "image/*",
+          hidden: "",
+        }),
+        h("img", {
+          src: "https://placehold.co/200x200/aaaaaa/ffffff?text=%20",
+          alt: "프로필 미리보기",
+        }),
+        h("span", { class: "badge" }, "변경")
+      )
+    ),
+
+    h(
+      "form",
+      { class: "form", autocomplete: "off" },
+
+      h(
+        "div",
+        { class: "field" },
+        h("label", { class: "input-label" }, "이메일"),
+        h("p", { class: "readonly" }, "startupcode@gmail.com")
+      ),
+
+      h(
+        "div",
+        { class: "field" },
+        h("label", { class: "input-label", for: "nick" }, "닉네임"),
+        h(
+          "div",
+          { class: "row" },
+          h("input", {
+            id: "nick",
+            type: "text",
+            placeholder: "닉네임을 입력하세요",
+          })
+        )
+      ),
+
+      h("button", { type: "button", class: "btn primary block" }, "수정하기"),
+      h("button", { type: "button", class: "link danger" }, "회원 탈퇴"),
+      h("button", { type: "button", class: "btn primary pill" }, "완료")
+    )
+  );
+}
+
 async function loadProfile() {
   const emailEl = $(".field .readonly");
   const nickInput = $("#nick");
-  const avatarImg = $(".avatar-uploader img");
+  const avatarImg = document.querySelector(".avatar-uploader img");
   const headerAvatarBtn = $("#avatarBtn");
 
   try {
@@ -193,6 +313,11 @@ function setupAccountButtons() {
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("[PROFILE] profile-edit page init");
+
+  const layout = document.querySelector("main.layout");
+  if (layout) {
+    render(AppView(), layout);
+  }
 
   const avatarHelper = document.querySelector(".section.profile .helper");
   if (avatarHelper) {
