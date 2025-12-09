@@ -1,58 +1,9 @@
 import { $, setHelper, clearFormHelpers, setDisabled } from "../core/dom.js";
 import { loadAuth, saveAuth, clearAuth } from "../core/storage.js";
 import { UsersAPI } from "../api/users.js";
+import { h, render } from "../core/vdom.js";
 
 let currentProfileImage = null;
-
-function h(type, props, ...children) {
-  const flatChildren = children
-    .flat()
-    .filter((c) => c !== null && c !== false && c !== undefined);
-  return {
-    type,
-    props: props || {},
-    children: flatChildren,
-  };
-}
-
-function createElement(vnode) {
-  if (typeof vnode === "string" || typeof vnode === "number") {
-    return document.createTextNode(String(vnode));
-  }
-
-  const el = document.createElement(vnode.type);
-  const props = vnode.props || {};
-
-  for (const key in props) {
-    const value = props[key];
-    if (key === "class") {
-      el.className = value;
-    } else if (key === "dataset" && value && typeof value === "object") {
-      Object.assign(el.dataset, value);
-    } else {
-      el.setAttribute(key, value);
-    }
-  }
-
-  vnode.children.forEach((child) => {
-    el.appendChild(createElement(child));
-  });
-
-  return el;
-}
-
-function render(vnode, container) {
-  container.innerHTML = "";
-  if (!vnode) return;
-
-  if (Array.isArray(vnode)) {
-    vnode.forEach((child) => {
-      container.appendChild(createElement(child));
-    });
-  } else {
-    container.appendChild(createElement(vnode));
-  }
-}
 
 function AppView() {
   return h(
