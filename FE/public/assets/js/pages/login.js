@@ -7,6 +7,97 @@ import {
 } from "../core/dom.js";
 import { AuthAPI } from "../api/auth.js";
 
+function h(type, props, ...children) {
+  const flatChildren = children
+    .flat()
+    .filter((c) => c !== null && c !== false && c !== undefined);
+
+  return {
+    type,
+    props: props || {},
+    children: flatChildren,
+  };
+}
+
+function createElement(vnode) {
+  if (typeof vnode === "string" || typeof vnode === "number") {
+    return document.createTextNode(String(vnode));
+  }
+
+  const el = document.createElement(vnode.type);
+  const props = vnode.props || {};
+
+  for (const key in props) {
+    const value = props[key];
+    if (key === "class") {
+      el.className = value;
+    } else if (key === "dataset" && value && typeof value === "object") {
+      Object.assign(el.dataset, value);
+    } else {
+      el.setAttribute(key, value);
+    }
+  }
+
+  vnode.children.forEach((child) => {
+    el.appendChild(createElement(child));
+  });
+
+  return el;
+}
+
+function render(vnode, container) {
+  container.innerHTML = "";
+  if (!vnode) return;
+
+  if (Array.isArray(vnode)) {
+    vnode.forEach((child) => {
+      container.appendChild(createElement(child));
+    });
+  } else {
+    container.appendChild(createElement(vnode));
+  }
+}
+
+function AppView() {
+  return h(
+    "section",
+    { class: "auth-card" },
+    h("h2", { class: "auth-title" }, "로그인"),
+    h(
+      "form",
+      { class: "auth-form", autocomplete: "off" },
+
+      h(
+        "div",
+        { class: "form-field" },
+        h("label", { for: "email" }, "이메일"),
+        h("input", {
+          id: "email",
+          type: "email",
+          placeholder: "이메일을 입력하세요",
+        }),
+        h("p", { class: "helper" }, "")
+      ),
+
+      h(
+        "div",
+        { class: "form-field" },
+        h("label", { for: "password" }, "비밀번호"),
+        h("input", {
+          id: "password",
+          type: "password",
+          placeholder: "비밀번호를 입력하세요",
+        }),
+        h("p", { class: "helper" }, "")
+      ),
+
+      h("button", { class: "btn primary", type: "submit" }, "로그인"),
+
+      h("button", { class: "link-btn", type: "button" }, "회원가입")
+    )
+  );
+}
+
 function isValidEmail(v) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
@@ -50,16 +141,24 @@ function handleServerError(message, { emailEl, pwEl }) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const form = $(".auth-form");
-  if (!form) {
-    console.warn("[LOGIN] .auth-form 요소를 찾지 못했습니다.");
+  const root = document.querySelector("main.auth-layout");
+  if (!root) {
+    console.warn("[LOGIN] main.auth-layout 요소를 찾지 못했습니다.");
     return;
   }
 
+  render(AppView(), root);
+
+  const form = $(".auth-form");
   const emailEl = $("#email");
   const pwEl = $("#password");
   const submitBtn = $(".btn.primary");
   const signupLink = $(".link-btn");
+
+  if (!form || !emailEl || !pwEl) {
+    console.warn("[LOGIN] form / email / password 요소를 찾지 못했습니다.");
+    return;
+  }
 
   if (signupLink) {
     on(signupLink, "click", () => {
