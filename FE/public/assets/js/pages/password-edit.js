@@ -1,4 +1,10 @@
-import { $, setHelper, clearFormHelpers, setDisabled } from "../core/dom.js";
+import {
+  $,
+  setHelper,
+  clearFormHelpers,
+  setDisabled,
+  on,
+} from "../core/dom.js";
 import { PATCH } from "../core/http.js";
 import { UsersAPI } from "../api/users.js";
 import { loadMyAvatar, setupAvatarMenu } from "../common/ui.js";
@@ -16,25 +22,102 @@ async function ensureLogin() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const me = await ensureLogin();
-  if (!me) return;
+function h(type, props, ...children) {
+  const flatChildren = children
+    .flat()
+    .filter((c) => c !== null && c !== false && c !== undefined);
 
-  loadMyAvatar("[PASSWORD]");
-  setupAvatarMenu();
+  return {
+    type,
+    props: props || {},
+    children: flatChildren,
+  };
+}
 
-  const form = $(".form");
-  if (!form) {
-    console.warn("[PASSWORD] .form 요소를 찾지 못했습니다.");
-    return;
+function createElement(vnode) {
+  if (typeof vnode === "string" || typeof vnode === "number") {
+    return document.createTextNode(String(vnode));
   }
 
-  const currentPwEl = $("#currentPw");
-  const pwEl = $("#pw");
-  const pw2El = $("#pw2");
-  const submitBtn = $(".btn.primary");
+  const el = document.createElement(vnode.type);
+  const props = vnode.props || {};
 
-  function validate() {
+  for (const key in props) {
+    const value = props[key];
+    if (key === "class") {
+      el.className = value;
+    } else if (key === "dataset" && value && typeof value === "object") {
+      Object.assign(el.dataset, value);
+    } else {
+      el.setAttribute(key, value);
+    }
+  }
+
+  vnode.children.forEach((child) => {
+    el.appendChild(createElement(child));
+  });
+
+  return el;
+}
+
+function render(vnode, container) {
+  container.innerHTML = "";
+  if (!vnode) return;
+  container.appendChild(createElement(vnode));
+}
+
+function AppView() {
+  return h(
+    "section",
+    { class: "card" },
+    h("h2", { class: "title" }, "비밀번호 수정"),
+    h(
+      "form",
+      { class: "form", autocomplete: "off" },
+
+      h(
+        "div",
+        { class: "field" },
+        h("label", { for: "currentPw", class: "label" }, "현재 비밀번호"),
+        h("input", {
+          id: "currentPw",
+          type: "password",
+          placeholder: "현재 비밀번호를 입력하세요",
+        }),
+        h("p", { class: "helper" }, "")
+      ),
+
+      h(
+        "div",
+        { class: "field" },
+        h("label", { for: "pw", class: "label" }, "새 비밀번호"),
+        h("input", {
+          id: "pw",
+          type: "password",
+          placeholder: "새 비밀번호를 입력하세요",
+        }),
+        h("p", { class: "helper" }, "")
+      ),
+
+      h(
+        "div",
+        { class: "field" },
+        h("label", { for: "pw2", class: "label" }, "새 비밀번호 확인"),
+        h("input", {
+          id: "pw2",
+          type: "password",
+          placeholder: "새 비밀번호를 한번 더 입력하세요",
+        }),
+        h("p", { class: "helper" }, "")
+      ),
+
+      h("button", { class: "btn primary", type: "submit" }, "수정하기")
+    )
+  );
+}
+
+function makeValidator(currentPwEl, pwEl, pw2El, form) {
+  return function validate() {
     clearFormHelpers(form);
     let ok = true;
 
@@ -68,9 +151,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     return ok;
+  };
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const me = await ensureLogin();
+  if (!me) return;
+
+  loadMyAvatar("[PASSWORD]");
+  setupAvatarMenu();
+
+  const layout = document.querySelector("main.layout");
+  if (!layout) {
+    console.warn("[PASSWORD] main.layout 요소를 찾지 못했습니다.");
+    return;
+  }
+  render(AppView(), layout);
+
+  const form = $(".form");
+  if (!form) {
+    console.warn("[PASSWORD] .form 요소를 찾지 못했습니다.");
+    return;
   }
 
-  form.addEventListener("submit", async (e) => {
+  const currentPwEl = $("#currentPw");
+  const pwEl = $("#pw");
+  const pw2El = $("#pw2");
+  const submitBtn = $(".btn.primary");
+
+  const validate = makeValidator(currentPwEl, pwEl, pw2El, form);
+
+  on(form, "submit", async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
