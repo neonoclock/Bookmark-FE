@@ -69,13 +69,14 @@ function toPostDetail(raw = {}) {
     views: raw.views ?? 0,
     createdAt: raw.created_at ?? raw.createdAt ?? "",
     updatedAt: raw.updated_at ?? raw.updatedAt ?? "",
-    liked: raw.liked ?? raw.likedByViewer ?? false,
+    // Backend currently may not provide liked status in detail response.
+    liked: raw.liked ?? raw.likedByViewer ?? null,
     comments,
   };
 }
 
 export async function getPostDetail(postId, { signal } = {}) {
-  const response = await publicHttpClient.get(`${POSTS_BASE_PATH}/${postId}`, {
+  const response = await httpClient.get(`${POSTS_BASE_PATH}/${postId}`, {
     signal,
   });
   return toPostDetail(unwrapApiData(response));
@@ -107,6 +108,34 @@ export async function updatePost(postId, payload = {}) {
   return unwrapApiData(response);
 }
 
+export function deletePost(postId) {
+  return httpClient.delete(`${POSTS_BASE_PATH}/${postId}`);
+}
+
+export async function getPostComments(postId, { signal } = {}) {
+  const response = await publicHttpClient.get(`${POSTS_BASE_PATH}/${postId}/comments`, { signal });
+  const payload = unwrapApiData(response);
+  return Array.isArray(payload) ? payload.map(toPostComment) : [];
+}
+
+export async function createPostComment(postId, payload = {}) {
+  const response = await httpClient.post(`${POSTS_BASE_PATH}/${postId}/comments`, {
+    content: payload.content,
+  });
+  return unwrapApiData(response);
+}
+
+export async function updatePostComment(postId, commentId, payload = {}) {
+  const response = await httpClient.patch(`${POSTS_BASE_PATH}/${postId}/comments/${commentId}`, {
+    content: payload.content,
+  });
+  return unwrapApiData(response);
+}
+
+export function deletePostComment(postId, commentId) {
+  return httpClient.delete(`${POSTS_BASE_PATH}/${postId}/comments/${commentId}`);
+}
+
 export const postsApi = {
   getPosts,
   getPostDetail,
@@ -114,4 +143,9 @@ export const postsApi = {
   unlikePost,
   createPost,
   updatePost,
+  deletePost,
+  getPostComments,
+  createPostComment,
+  updatePostComment,
+  deletePostComment,
 };

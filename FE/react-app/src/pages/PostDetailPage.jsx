@@ -26,6 +26,20 @@ function mapDetailError(error) {
   }
 }
 
+function mapActionError(error, fallback) {
+  const code = error?.payload?.code ?? error?.code;
+  switch (code) {
+    case "not_found":
+      return "대상이 존재하지 않습니다.";
+    case "invalid_request":
+      return "입력값을 다시 확인해주세요.";
+    case "internal_error":
+      return "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+    default:
+      return error?.message || fallback;
+  }
+}
+
 function isUnauthorizedError(error) {
   const code = error?.payload?.code ?? error?.code;
   const status = error?.status;
@@ -33,7 +47,8 @@ function isUnauthorizedError(error) {
     status === 401 ||
     status === 403 ||
     code === "UNAUTHORIZED" ||
-    code === "FORBIDDEN"
+    code === "FORBIDDEN" ||
+    code === "unauthorized"
   );
 }
 
@@ -48,10 +63,46 @@ function PostDetailPage() {
   const [comments, setComments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiking, setIsLiking] = useState(false);
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [commentActionId, setCommentActionId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [commentDraft, setCommentDraft] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentDraft, setEditingCommentDraft] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
+
+  const userId = user?.id ?? user?.user_id;
+
+  const ensureLogin = useCallback(() => {
+    if (user) return true;
+    window.alert("로그인 후 이용 가능합니다.");
+    navigate("/login");
+    return false;
+  }, [navigate, user]);
 
   const loadPostDetail = useCallback(
+    async (signal) => {
+      const detail = await postsApi.getPostDetail(numericPostId, { signal });
+      if (!signal?.aborted) {
+        setPost(detail);
+        setComments(Array.isArray(detail?.comments) ? detail.comments : []);
+      }
+    },
+    [numericPostId],
+  );
+
+  const loadComments = useCallback(
+    async (signal) => {
+      const list = await postsApi.getPostComments(numericPostId, { signal });
+      if (!signal?.aborted) {
+        setComments(list);
+      }
+    },
+    [numericPostId],
+  );
+
+  const loadAll = useCallback(
     async (signal) => {
       if (!isValidPostId) {
         setIsLoading(false);
@@ -65,11 +116,7 @@ function PostDetailPage() {
       setErrorMessage("");
 
       try {
-        const detail = await postsApi.getPostDetail(numericPostId, { signal });
-        if (signal?.aborted) return;
-
-        setPost(detail);
-        setComments(Array.isArray(detail?.comments) ? detail.comments : []);
+        await loadPostDetail(signal);
       } catch (error) {
         if (signal?.aborted || error?.name === "AbortError") return;
         setPost(null);
@@ -81,31 +128,25 @@ function PostDetailPage() {
         }
       }
     },
-    [isValidPostId, numericPostId],
+    [isValidPostId, loadPostDetail],
   );
 
   useEffect(() => {
     const controller = new AbortController();
-    void loadPostDetail(controller.signal);
+    void loadAll(controller.signal);
     return () => controller.abort();
-  }, [loadPostDetail]);
+  }, [loadAll, retryKey]);
 
   const isOwner = useMemo(() => {
-    const userId = user?.id ?? user?.user_id;
     if (userId == null || post?.authorId == null) return false;
     return Number(userId) === Number(post.authorId);
-  }, [user, post]);
+  }, [post, userId]);
 
   const handleToggleLike = async () => {
     if (!isValidPostId || !post || isLiking) return;
+    if (!ensureLogin()) return;
 
-    if (!user) {
-      window.alert("좋아요는 로그인 후 이용 가능합니다.");
-      navigate("/login");
-      return;
-    }
-
-    const wasLiked = Boolean(post.liked);
+    const wasLiked = post.liked === true;
     setIsLiking(true);
 
     try {
@@ -142,9 +183,127 @@ function PostDetailPage() {
         return;
       }
 
-      window.alert(error?.message || "좋아요 처리 중 오류가 발생했습니다.");
+      window.alert(mapActionError(error, "좋아요 처리 중 오류가 발생했습니다."));
     } finally {
       setIsLiking(false);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!isValidPostId || isDeletingPost) return;
+    if (!ensureLogin()) return;
+    if (!isOwner) {
+      window.alert("작성자만 삭제할 수 있습니다.");
+      return;
+    }
+
+    const ok = window.confirm("정말 이 게시글을 삭제하시겠습니까?");
+    if (!ok) return;
+
+    setIsDeletingPost(true);
+    try {
+      await postsApi.deletePost(numericPostId);
+      window.alert("게시글이 삭제되었습니다.");
+      navigate("/board", { replace: true });
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        window.alert("작성자만 삭제할 수 있습니다.");
+        navigate(`/post/${numericPostId}`, { replace: true });
+        return;
+      }
+      window.alert(mapActionError(error, "게시글 삭제 중 오류가 발생했습니다."));
+    } finally {
+      setIsDeletingPost(false);
+    }
+  };
+
+  const handleSubmitComment = async () => {
+    if (!isValidPostId || isSubmittingComment) return;
+    if (!ensureLogin()) return;
+
+    const content = commentDraft.trim();
+    if (!content) {
+      window.alert("댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    setIsSubmittingComment(true);
+    try {
+      await postsApi.createPostComment(numericPostId, { content });
+      setCommentDraft("");
+      await loadComments();
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        window.alert("로그인 후 댓글 작성이 가능합니다.");
+        navigate("/login");
+        return;
+      }
+      window.alert(mapActionError(error, "댓글 등록에 실패했습니다."));
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  const startEditComment = (commentId, originalContent) => {
+    setEditingCommentId(commentId);
+    setEditingCommentDraft(originalContent ?? "");
+  };
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingCommentDraft("");
+  };
+
+  const handleSaveEditComment = async (commentId) => {
+    if (!isValidPostId || !commentId) return;
+    if (!ensureLogin()) return;
+
+    const content = editingCommentDraft.trim();
+    if (!content) {
+      window.alert("댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    setCommentActionId(commentId);
+    try {
+      await postsApi.updatePostComment(numericPostId, commentId, { content });
+      setEditingCommentId(null);
+      setEditingCommentDraft("");
+      await loadComments();
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        window.alert("작성자만 수정할 수 있습니다.");
+        return;
+      }
+      window.alert(mapActionError(error, "댓글 수정에 실패했습니다."));
+    } finally {
+      setCommentActionId(null);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!isValidPostId || !commentId) return;
+    if (!ensureLogin()) return;
+
+    const ok = window.confirm("이 댓글을 삭제하시겠습니까?");
+    if (!ok) return;
+
+    setCommentActionId(commentId);
+    try {
+      await postsApi.deletePostComment(numericPostId, commentId);
+      if (editingCommentId === commentId) {
+        setEditingCommentId(null);
+        setEditingCommentDraft("");
+      }
+      await loadComments();
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        window.alert("작성자만 삭제할 수 있습니다.");
+        return;
+      }
+      window.alert(mapActionError(error, "댓글 삭제에 실패했습니다."));
+    } finally {
+      setCommentActionId(null);
     }
   };
 
@@ -163,7 +322,12 @@ function PostDetailPage() {
       <section className="post-detail-page">
         <article className="post-detail-state-card">
           <p className="post-detail-state-text">{errorMessage || "게시글을 불러오지 못했습니다."}</p>
-          <button className="post-detail-retry-btn" type="button" onClick={() => void loadPostDetail()}>
+          <button
+            className="post-detail-retry-btn"
+            type="button"
+            disabled={isLoading}
+            onClick={() => setRetryKey((prev) => prev + 1)}
+          >
             다시 시도
           </button>
         </article>
@@ -216,8 +380,13 @@ function PostDetailPage() {
                 >
                   수정
                 </button>
-                <button className="post-detail-chip" type="button" disabled>
-                  삭제
+                <button
+                  className="post-detail-chip"
+                  type="button"
+                  onClick={handleDeletePost}
+                  disabled={isDeletingPost}
+                >
+                  {isDeletingPost ? "삭제 중..." : "삭제"}
                 </button>
               </div>
             ) : null}
@@ -241,7 +410,7 @@ function PostDetailPage() {
 
           <div className="post-detail-stats">
             <button
-              className={`post-detail-stat ${post.liked ? "is-liked" : ""}`}
+              className={`post-detail-stat ${post.liked === true ? "is-liked" : ""}`}
               type="button"
               onClick={handleToggleLike}
               disabled={isLiking}
@@ -266,14 +435,16 @@ function PostDetailPage() {
               placeholder="댓글을 입력해주세요."
               value={commentDraft}
               onChange={(event) => setCommentDraft(event.target.value)}
+              disabled={isSubmittingComment}
             />
             <div className="post-detail-comment-submit-wrap">
               <button
                 className="post-detail-submit-btn"
                 type="button"
-                disabled={!commentDraft.trim()}
+                disabled={!commentDraft.trim() || isSubmittingComment}
+                onClick={handleSubmitComment}
               >
-                댓글 등록
+                {isSubmittingComment ? "등록 중..." : "댓글 등록"}
               </button>
             </div>
           </section>
@@ -283,11 +454,12 @@ function PostDetailPage() {
               <p className="post-detail-comments-empty">첫 댓글을 남겨주세요!</p>
             ) : (
               comments.map((comment) => {
-                const userId = user?.id ?? user?.user_id;
                 const isMyComment =
                   userId != null &&
                   comment.authorId != null &&
                   Number(userId) === Number(comment.authorId);
+                const isEditing = editingCommentId === comment.id;
+                const isCommentBusy = commentActionId === comment.id;
 
                 return (
                   <article key={comment.id} className="post-detail-comment">
@@ -302,16 +474,58 @@ function PostDetailPage() {
                         </div>
                         {isMyComment ? (
                           <div className="post-detail-comment-actions">
-                            <button className="post-detail-chip" type="button" disabled>
-                              수정
-                            </button>
-                            <button className="post-detail-chip" type="button" disabled>
-                              삭제
-                            </button>
+                            {isEditing ? (
+                              <>
+                                <button
+                                  className="post-detail-chip"
+                                  type="button"
+                                  disabled={isCommentBusy}
+                                  onClick={() => void handleSaveEditComment(comment.id)}
+                                >
+                                  {isCommentBusy ? "저장 중..." : "저장"}
+                                </button>
+                                <button
+                                  className="post-detail-chip"
+                                  type="button"
+                                  disabled={isCommentBusy}
+                                  onClick={cancelEditComment}
+                                >
+                                  취소
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="post-detail-chip"
+                                  type="button"
+                                  disabled={isCommentBusy}
+                                  onClick={() => startEditComment(comment.id, comment.content)}
+                                >
+                                  수정
+                                </button>
+                                <button
+                                  className="post-detail-chip"
+                                  type="button"
+                                  disabled={isCommentBusy}
+                                  onClick={() => void handleDeleteComment(comment.id)}
+                                >
+                                  {isCommentBusy ? "삭제 중..." : "삭제"}
+                                </button>
+                              </>
+                            )}
                           </div>
                         ) : null}
                       </div>
-                      <p className="post-detail-comment-text">{comment.content}</p>
+                      {isEditing ? (
+                        <textarea
+                          className="post-detail-comment-edit-input"
+                          value={editingCommentDraft}
+                          onChange={(event) => setEditingCommentDraft(event.target.value)}
+                          disabled={isCommentBusy}
+                        />
+                      ) : (
+                        <p className="post-detail-comment-text">{comment.content}</p>
+                      )}
                     </div>
                   </article>
                 );
