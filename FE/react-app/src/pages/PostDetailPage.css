@@ -2,43 +2,6 @@
   width: 100%;
 }
 
-.post-detail-state-card {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 36px 24px;
-  border: 1px solid #e6d5d0;
-  border-radius: 22px;
-  background: #fdf7f6;
-  text-align: center;
-}
-
-.post-detail-state-text {
-  margin: 0;
-  color: #7d6166;
-  font-size: 14px;
-}
-
-.post-detail-retry-btn {
-  margin-top: 12px;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid #e6ccd3;
-  background: #fff;
-  color: #a05468;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.post-detail-retry-btn:hover {
-  background: #fff2f5;
-}
-
-.post-detail-retry-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 
 .post-detail-topbar {
   max-width: 760px;

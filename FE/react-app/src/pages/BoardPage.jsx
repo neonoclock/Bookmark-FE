@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { postsApi } from "@/lib/api/postsApi.js";
+import PageStateCard from "@/components/PageStateCard.jsx";
 import "./BoardPage.css";
 
 function mapPostsListError(error) {
@@ -73,19 +74,13 @@ function BoardPage() {
 
       <section className="board-list" aria-label="게시글 목록">
         {isLoading ? (
-          <p className="board-empty">게시글을 불러오는 중입니다...</p>
+          <PageStateCard message="게시글을 불러오는 중입니다..." />
         ) : errorMessage ? (
-          <div className="board-list-state">
-            <p className="board-empty">{errorMessage}</p>
-            <button
-              className="board-retry-btn"
-              type="button"
-              disabled={isLoading}
-              onClick={() => void loadPosts()}
-            >
-              다시 시도
-            </button>
-          </div>
+          <PageStateCard
+            message={errorMessage}
+            onRetry={() => void loadPosts()}
+            isRetrying={isLoading}
+          />
         ) : posts.length === 0 ? (
           <p className="board-empty">아직 작성된 게시글이 없습니다.</p>
         ) : (

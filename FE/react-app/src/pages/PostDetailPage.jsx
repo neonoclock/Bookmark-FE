@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CommentList from "@/components/comments/CommentList.jsx";
+import PageStateCard from "@/components/PageStateCard.jsx";
 import { postsApi } from "@/lib/api/postsApi.js";
 import { useAuth } from "@/hooks/useAuth.js";
 import "./PostDetailPage.css";
@@ -334,9 +335,7 @@ function PostDetailPage() {
   if (isLoading) {
     return (
       <section className="post-detail-page">
-        <article className="post-detail-state-card">
-          <p className="post-detail-state-text">게시글을 불러오는 중입니다...</p>
-        </article>
+        <PageStateCard message="게시글을 불러오는 중입니다..." />
       </section>
     );
   }
@@ -344,17 +343,11 @@ function PostDetailPage() {
   if (errorMessage || !post) {
     return (
       <section className="post-detail-page">
-        <article className="post-detail-state-card">
-          <p className="post-detail-state-text">{errorMessage || "게시글을 불러오지 못했습니다."}</p>
-          <button
-            className="post-detail-retry-btn"
-            type="button"
-            disabled={isLoading}
-            onClick={() => setRetryKey((prev) => prev + 1)}
-          >
-            다시 시도
-          </button>
-        </article>
+        <PageStateCard
+          message={errorMessage || "게시글을 불러오지 못했습니다."}
+          onRetry={() => setRetryKey((prev) => prev + 1)}
+          isRetrying={isLoading}
+        />
       </section>
     );
   }

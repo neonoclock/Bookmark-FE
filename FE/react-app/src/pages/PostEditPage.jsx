@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth.js";
 import { postsApi } from "@/lib/api/postsApi.js";
+import PageStateCard from "@/components/PageStateCard.jsx";
 import "./PostEditPage.css";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
@@ -195,9 +196,7 @@ function PostEditPage() {
   if (isLoading) {
     return (
       <section className="post-edit-page">
-        <article className="post-edit-state-card">
-          <p className="post-edit-state-text">게시글 정보를 불러오는 중입니다...</p>
-        </article>
+        <PageStateCard message="게시글 정보를 불러오는 중입니다..." />
       </section>
     );
   }
