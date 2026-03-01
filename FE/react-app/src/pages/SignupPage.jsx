@@ -61,10 +61,6 @@ function mapServerError(error) {
     if (Object.keys(mapped).length > 0) return mapped;
   }
 
-  if (code === "duplicate_user") {
-    return { email: "이미 사용 중인 이메일입니다." };
-  }
-
   switch (code) {
     case "invalid_request":
       return { form: "입력값을 다시 확인해주세요." };

@@ -75,6 +75,38 @@
   color: #9a806b;
 }
 
+.profile-avatar-remove {
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  color: #7a1a1a;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.profile-avatar-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.profile-helper--error {
+  color: #c64545;
+}
+
+.profile-form-error {
+  margin: 0;
+  font-size: 13px;
+  color: #c64545;
+}
+
+.profile-form-success {
+  margin: 0;
+  font-size: 13px;
+  color: #2f6a42;
+}
+
 .profile-form {
   display: grid;
   gap: 14px;
@@ -147,6 +179,12 @@
 
 .profile-btn:hover {
   background: #5d412d;
+}
+
+.profile-btn:disabled,
+.profile-link-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .profile-link-danger {
