@@ -3,8 +3,5 @@
     "dev": "npm --prefix react-app run dev",
     "build": "npm --prefix react-app run build",
     "preview": "npm --prefix react-app run preview"
-  },
-  "dependencies": {
-    "readline-sync": "^1.4.10"
   }
 }
