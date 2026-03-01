@@ -69,13 +69,13 @@ function toPostDetail(raw = {}) {
     views: raw.views ?? 0,
     createdAt: raw.created_at ?? raw.createdAt ?? "",
     updatedAt: raw.updated_at ?? raw.updatedAt ?? "",
-    // Backend currently may not provide liked status in detail response.
     liked: raw.liked ?? raw.likedByViewer ?? null,
     comments,
   };
 }
 
 export async function getPostDetail(postId, { signal } = {}) {
+  // httpClient sends the token only when present; anonymous users are unaffected.
   const response = await httpClient.get(`${POSTS_BASE_PATH}/${postId}`, {
     signal,
   });

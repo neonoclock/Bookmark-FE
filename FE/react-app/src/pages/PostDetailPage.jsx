@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CommentList from "@/components/comments/CommentList.jsx";
 import { postsApi } from "@/lib/api/postsApi.js";
@@ -69,9 +69,13 @@ function PostDetailPage() {
   const [commentActionId, setCommentActionId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [commentDraft, setCommentDraft] = useState("");
+  const [commentFormError, setCommentFormError] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentDraft, setEditingCommentDraft] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const commentsSeqRef = useRef(0);
+  const isMountedRef = useRef(true);
+  const commentLoadAbortRef = useRef(null);
 
   const userId = user?.id ?? user?.user_id;
 
@@ -95,13 +99,23 @@ function PostDetailPage() {
 
   const loadComments = useCallback(
     async (signal) => {
+      const seq = ++commentsSeqRef.current;
       const list = await postsApi.getPostComments(numericPostId, { signal });
       if (!signal?.aborted) {
+        if (!isMountedRef.current) return;
+        if (seq !== commentsSeqRef.current) return;
         setComments(list);
       }
     },
     [numericPostId],
   );
+
+  const reloadComments = useCallback(async () => {
+    commentLoadAbortRef.current?.abort();
+    const ac = new AbortController();
+    commentLoadAbortRef.current = ac;
+    await loadComments(ac.signal);
+  }, [loadComments]);
 
   const loadAll = useCallback(
     async (signal) => {
@@ -137,6 +151,13 @@ function PostDetailPage() {
     void loadAll(controller.signal);
     return () => controller.abort();
   }, [loadAll, retryKey]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      commentLoadAbortRef.current?.abort();
+    };
+  }, []);
 
   const isOwner = useMemo(() => {
     if (userId == null || post?.authorId == null) return false;
@@ -224,22 +245,24 @@ function PostDetailPage() {
 
     const content = commentDraft.trim();
     if (!content) {
-      window.alert("댓글 내용을 입력해주세요.");
+      setCommentFormError("댓글 내용을 입력해주세요.");
       return;
     }
 
+    setCommentFormError("");
     setIsSubmittingComment(true);
     try {
       await postsApi.createPostComment(numericPostId, { content });
       setCommentDraft("");
-      await loadComments();
+      setCommentFormError("");
+      await reloadComments();
     } catch (error) {
       if (isUnauthorizedError(error)) {
         window.alert("로그인 후 댓글 작성이 가능합니다.");
         navigate("/login");
         return;
       }
-      window.alert(mapActionError(error, "댓글 등록에 실패했습니다."));
+      setCommentFormError(mapActionError(error, "댓글 등록에 실패했습니다."));
     } finally {
       setIsSubmittingComment(false);
     }
@@ -270,7 +293,7 @@ function PostDetailPage() {
       await postsApi.updatePostComment(numericPostId, commentId, { content });
       setEditingCommentId(null);
       setEditingCommentDraft("");
-      await loadComments();
+      await reloadComments();
     } catch (error) {
       if (isUnauthorizedError(error)) {
         window.alert("작성자만 수정할 수 있습니다.");
@@ -296,7 +319,7 @@ function PostDetailPage() {
         setEditingCommentId(null);
         setEditingCommentDraft("");
       }
-      await loadComments();
+      await reloadComments();
     } catch (error) {
       if (isUnauthorizedError(error)) {
         window.alert("작성자만 삭제할 수 있습니다.");
@@ -435,9 +458,15 @@ function PostDetailPage() {
             <textarea
               placeholder="댓글을 입력해주세요."
               value={commentDraft}
-              onChange={(event) => setCommentDraft(event.target.value)}
+              onChange={(event) => {
+                setCommentDraft(event.target.value);
+                if (commentFormError) setCommentFormError("");
+              }}
               disabled={isSubmittingComment}
             />
+            {commentFormError ? (
+              <p className="post-detail-comment-form-error">{commentFormError}</p>
+            ) : null}
             <div className="post-detail-comment-submit-wrap">
               <button
                 className="post-detail-submit-btn"

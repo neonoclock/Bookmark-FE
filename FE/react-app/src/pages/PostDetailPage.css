@@ -288,6 +288,12 @@
   margin-top: 10px;
 }
 
+.post-detail-comment-form-error {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #d14747;
+}
+
 .post-detail-submit-btn {
   height: 32px;
   padding: 0 14px;
