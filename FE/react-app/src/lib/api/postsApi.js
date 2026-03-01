@@ -98,10 +98,20 @@ export async function createPost(payload = {}) {
   return unwrapApiData(response);
 }
 
+export async function updatePost(postId, payload = {}) {
+  const response = await httpClient.patch(`${POSTS_BASE_PATH}/${postId}`, {
+    title: payload.title,
+    content: payload.content,
+    image_url: payload.imageUrl ?? null,
+  });
+  return unwrapApiData(response);
+}
+
 export const postsApi = {
   getPosts,
   getPostDetail,
   likePost,
   unlikePost,
   createPost,
+  updatePost,
 };

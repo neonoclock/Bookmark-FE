@@ -3,6 +3,21 @@
   margin: 0 auto 70px;
 }
 
+.post-edit-state-card {
+  border: 1px solid #e6d5d0;
+  border-radius: 20px;
+  background: rgba(253, 247, 246, 0.9);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.04);
+  padding: 36px 24px;
+  text-align: center;
+}
+
+.post-edit-state-text {
+  margin: 0;
+  font-size: 14px;
+  color: #7d6166;
+}
+
 .post-edit-topbar {
   margin-bottom: 6px;
 }
@@ -111,6 +126,12 @@
 }
 
 .post-edit-helper.error {
+  color: #d14747;
+}
+
+.post-edit-form-error {
+  margin: 8px 0 0;
+  font-size: 13px;
   color: #d14747;
 }
 
