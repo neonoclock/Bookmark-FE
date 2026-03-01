@@ -2,6 +2,39 @@
   width: 100%;
 }
 
+.post-detail-state-card {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 36px 24px;
+  border: 1px solid #e6d5d0;
+  border-radius: 22px;
+  background: #fdf7f6;
+  text-align: center;
+}
+
+.post-detail-state-text {
+  margin: 0;
+  color: #7d6166;
+  font-size: 14px;
+}
+
+.post-detail-retry-btn {
+  margin-top: 12px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #e6ccd3;
+  background: #fff;
+  color: #a05468;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.post-detail-retry-btn:hover {
+  background: #fff2f5;
+}
+
 .post-detail-topbar {
   max-width: 760px;
   margin: 0 auto 8px;
@@ -92,6 +125,14 @@
   background: linear-gradient(145deg, #feeef1, #f6dce2);
 }
 
+.post-detail-author-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e6d0d4;
+}
+
 .post-detail-author-text {
   display: flex;
   flex-direction: column;
@@ -131,6 +172,11 @@
 
 .post-detail-chip:hover {
   background: #ffeaf3;
+}
+
+.post-detail-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .post-detail-media {
@@ -191,6 +237,10 @@
 
 .post-detail-stats button.post-detail-stat:hover {
   background: #ffeff5;
+}
+
+.post-detail-stats button.post-detail-stat:disabled {
+  cursor: default;
 }
 
 .post-detail-stat.is-liked,
@@ -260,6 +310,12 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+.post-detail-comments-empty {
+  margin: 0;
+  font-size: 13px;
+  color: #9b7a7a;
 }
 
 .post-detail-comment {

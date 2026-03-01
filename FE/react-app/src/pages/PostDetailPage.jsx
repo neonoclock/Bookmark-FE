@@ -1,37 +1,8 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { postsApi } from "@/lib/api/postsApi.js";
+import { useAuth } from "@/hooks/useAuth.js";
 import "./PostDetailPage.css";
-
-const MOCK_POST = {
-  id: 301,
-  title: "한 문장을 오래 붙잡고 읽는 밤",
-  authorName: "문장수집가",
-  createdAt: "2026-02-27 22:13:00",
-  content:
-    "오래된 책장을 넘기다 보면, 그 시절의 내가 형광펜으로 밑줄 친 문장을 다시 만나게 됩니다.\n" +
-    "그때는 몰랐던 의미가, 지금의 마음에는 또 다른 방식으로 들어옵니다.\n\n" +
-    "오늘은 문장 하나를 오래 붙잡고 읽었습니다.\n" +
-    "읽고 나서야 비로소, 내가 지금 어떤 속도로 살아가고 있는지 조금 알 것 같았습니다.",
-  imageUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200",
-  likes: 23,
-  views: 148,
-  liked: false,
-};
-
-const MOCK_COMMENTS = [
-  {
-    id: 1,
-    authorName: "달빛독자",
-    createdAt: "2026-02-28 09:02:11",
-    content: "문장 하나를 오래 읽는다는 표현이 정말 좋네요.",
-  },
-  {
-    id: 2,
-    authorName: "새벽책방",
-    createdAt: "2026-02-28 10:21:48",
-    content: "저도 다시 읽을 때 전혀 다른 감정이 올라오더라고요.",
-  },
-];
 
 function splitParagraphs(text) {
   if (!text) return [];
@@ -41,29 +12,166 @@ function splitParagraphs(text) {
     .filter(Boolean);
 }
 
+function mapDetailError(error) {
+  const code = error?.payload?.code ?? error?.code;
+  switch (code) {
+    case "not_found":
+      return "게시글을 찾을 수 없습니다.";
+    case "invalid_request":
+      return "요청값이 올바르지 않습니다.";
+    case "internal_error":
+      return "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+    default:
+      return error?.message || "게시글을 불러오는 중 오류가 발생했습니다.";
+  }
+}
+
+function isUnauthorizedError(error) {
+  const code = error?.payload?.code ?? error?.code;
+  const status = error?.status;
+  return (
+    status === 401 ||
+    status === 403 ||
+    code === "UNAUTHORIZED" ||
+    code === "FORBIDDEN"
+  );
+}
+
 function PostDetailPage() {
   const navigate = useNavigate();
   const { postId } = useParams();
-  const [liked, setLiked] = useState(MOCK_POST.liked);
-  const [likes, setLikes] = useState(MOCK_POST.likes);
+  const { user } = useAuth();
+  const numericPostId = Number(postId);
+  const isValidPostId = Number.isInteger(numericPostId) && numericPostId > 0;
+
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLiking, setIsLiking] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [commentDraft, setCommentDraft] = useState("");
-  const post = useMemo(
-    () => ({
-      ...MOCK_POST,
-      id: Number(postId) || MOCK_POST.id,
-    }),
-    [postId],
+
+  const loadPostDetail = useCallback(
+    async (signal) => {
+      if (!isValidPostId) {
+        setIsLoading(false);
+        setErrorMessage("잘못된 접근입니다. 게시글 ID를 확인해주세요.");
+        setPost(null);
+        setComments([]);
+        return;
+      }
+
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const detail = await postsApi.getPostDetail(numericPostId, { signal });
+        if (signal?.aborted) return;
+
+        setPost(detail);
+        setComments(Array.isArray(detail?.comments) ? detail.comments : []);
+      } catch (error) {
+        if (signal?.aborted || error?.name === "AbortError") return;
+        setPost(null);
+        setComments([]);
+        setErrorMessage(mapDetailError(error));
+      } finally {
+        if (!signal?.aborted) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [isValidPostId, numericPostId],
   );
 
-  const paragraphs = useMemo(() => splitParagraphs(post.content), [post.content]);
-  const comments = useMemo(() => MOCK_COMMENTS, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadPostDetail(controller.signal);
+    return () => controller.abort();
+  }, [loadPostDetail]);
 
-  const handleToggleLike = () => {
-    setLiked((prev) => {
-      setLikes((currentLikes) => (prev ? Math.max(0, currentLikes - 1) : currentLikes + 1));
-      return !prev;
-    });
+  const isOwner = useMemo(() => {
+    const userId = user?.id ?? user?.user_id;
+    if (userId == null || post?.authorId == null) return false;
+    return Number(userId) === Number(post.authorId);
+  }, [user, post]);
+
+  const handleToggleLike = async () => {
+    if (!isValidPostId || !post || isLiking) return;
+
+    if (!user) {
+      window.alert("좋아요는 로그인 후 이용 가능합니다.");
+      navigate("/login");
+      return;
+    }
+
+    const wasLiked = Boolean(post.liked);
+    setIsLiking(true);
+
+    try {
+      if (wasLiked) {
+        await postsApi.unlikePost(numericPostId);
+      } else {
+        await postsApi.likePost(numericPostId);
+      }
+
+      setPost((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          liked: !wasLiked,
+          likes: wasLiked ? Math.max(0, (prev.likes ?? 0) - 1) : (prev.likes ?? 0) + 1,
+        };
+      });
+    } catch (error) {
+      const code = error?.payload?.code ?? error?.code;
+
+      if (isUnauthorizedError(error)) {
+        window.alert("로그인이 필요합니다. 다시 로그인해주세요.");
+        navigate("/login");
+        return;
+      }
+
+      if (code === "already_liked") {
+        setPost((prev) => (prev ? { ...prev, liked: true } : prev));
+        return;
+      }
+
+      if (code === "not_liked") {
+        setPost((prev) => (prev ? { ...prev, liked: false } : prev));
+        return;
+      }
+
+      window.alert(error?.message || "좋아요 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsLiking(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <section className="post-detail-page">
+        <article className="post-detail-state-card">
+          <p className="post-detail-state-text">게시글을 불러오는 중입니다...</p>
+        </article>
+      </section>
+    );
+  }
+
+  if (errorMessage || !post) {
+    return (
+      <section className="post-detail-page">
+        <article className="post-detail-state-card">
+          <p className="post-detail-state-text">{errorMessage || "게시글을 불러오지 못했습니다."}</p>
+          <button className="post-detail-retry-btn" type="button" onClick={() => void loadPostDetail()}>
+            다시 시도
+          </button>
+        </article>
+      </section>
+    );
+  }
+
+  const paragraphs = splitParagraphs(post.content);
 
   return (
     <section className="post-detail-page">
@@ -80,29 +188,39 @@ function PostDetailPage() {
 
       <article className="post-detail-card">
         <div className="post-detail-inner">
-          <h1 className="post-detail-title">{post.title}</h1>
+          <h1 className="post-detail-title">{post.title || "(제목 없음)"}</h1>
 
           <div className="post-detail-meta-line">
             <div className="post-detail-author">
-              <span className="post-detail-author-avatar" aria-hidden="true" />
+              {post.authorProfileImage ? (
+                <img
+                  className="post-detail-author-avatar-img"
+                  src={post.authorProfileImage}
+                  alt="작성자 아바타"
+                />
+              ) : (
+                <span className="post-detail-author-avatar" aria-hidden="true" />
+              )}
               <div className="post-detail-author-text">
-                <span className="post-detail-author-name">{post.authorName}</span>
-                <time className="post-detail-date">{post.createdAt}</time>
+                <span className="post-detail-author-name">{post.authorName || "익명"}</span>
+                <time className="post-detail-date">{post.createdAt || ""}</time>
               </div>
             </div>
 
-            <div className="post-detail-actions">
-              <button
-                className="post-detail-chip"
-                type="button"
-                onClick={() => navigate(`/post-edit/${post.id}`)}
-              >
-                수정
-              </button>
-              <button className="post-detail-chip" type="button">
-                삭제
-              </button>
-            </div>
+            {isOwner ? (
+              <div className="post-detail-actions">
+                <button
+                  className="post-detail-chip"
+                  type="button"
+                  onClick={() => navigate(`/post-edit/${post.id}`)}
+                >
+                  수정
+                </button>
+                <button className="post-detail-chip" type="button" disabled>
+                  삭제
+                </button>
+              </div>
+            ) : null}
           </div>
 
           {post.imageUrl ? (
@@ -112,22 +230,27 @@ function PostDetailPage() {
           ) : null}
 
           <div className="post-detail-content">
-            {paragraphs.map((paragraph, index) => (
-              <p key={`${index}-${paragraph.slice(0, 16)}`}>{paragraph}</p>
-            ))}
+            {paragraphs.length > 0 ? (
+              paragraphs.map((paragraph, index) => (
+                <p key={`${index}-${paragraph.slice(0, 16)}`}>{paragraph}</p>
+              ))
+            ) : (
+              <p>(내용이 없습니다)</p>
+            )}
           </div>
 
           <div className="post-detail-stats">
             <button
-              className={`post-detail-stat ${liked ? "is-liked" : ""}`}
+              className={`post-detail-stat ${post.liked ? "is-liked" : ""}`}
               type="button"
               onClick={handleToggleLike}
+              disabled={isLiking}
             >
-              <strong>{likes}</strong>
-              <span>좋아요</span>
+              <strong>{post.likes ?? 0}</strong>
+              <span>{isLiking ? "처리 중..." : "좋아요"}</span>
             </button>
             <div className="post-detail-stat">
-              <strong>{post.views}</strong>
+              <strong>{post.views ?? 0}</strong>
               <span>조회수</span>
             </div>
             <div className="post-detail-stat">
@@ -156,30 +279,44 @@ function PostDetailPage() {
           </section>
 
           <section className="post-detail-comments" aria-label="댓글 목록">
-            {comments.map((comment) => (
-              <article key={comment.id} className="post-detail-comment">
-                <div className="post-detail-comment-left">
-                  <span className="post-detail-comment-dot" />
-                </div>
-                <div className="post-detail-comment-body">
-                  <div className="post-detail-comment-head">
-                    <div className="post-detail-comment-who">
-                      <span className="post-detail-comment-name">{comment.authorName}</span>
-                      <time className="post-detail-comment-date">{comment.createdAt}</time>
+            {comments.length === 0 ? (
+              <p className="post-detail-comments-empty">첫 댓글을 남겨주세요!</p>
+            ) : (
+              comments.map((comment) => {
+                const userId = user?.id ?? user?.user_id;
+                const isMyComment =
+                  userId != null &&
+                  comment.authorId != null &&
+                  Number(userId) === Number(comment.authorId);
+
+                return (
+                  <article key={comment.id} className="post-detail-comment">
+                    <div className="post-detail-comment-left">
+                      <span className="post-detail-comment-dot" />
                     </div>
-                    <div className="post-detail-comment-actions">
-                      <button className="post-detail-chip" type="button">
-                        수정
-                      </button>
-                      <button className="post-detail-chip" type="button">
-                        삭제
-                      </button>
+                    <div className="post-detail-comment-body">
+                      <div className="post-detail-comment-head">
+                        <div className="post-detail-comment-who">
+                          <span className="post-detail-comment-name">{comment.authorName}</span>
+                          <time className="post-detail-comment-date">{comment.createdAt}</time>
+                        </div>
+                        {isMyComment ? (
+                          <div className="post-detail-comment-actions">
+                            <button className="post-detail-chip" type="button" disabled>
+                              수정
+                            </button>
+                            <button className="post-detail-chip" type="button" disabled>
+                              삭제
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                      <p className="post-detail-comment-text">{comment.content}</p>
                     </div>
-                  </div>
-                  <p className="post-detail-comment-text">{comment.content}</p>
-                </div>
-              </article>
-            ))}
+                  </article>
+                );
+              })
+            )}
           </section>
         </div>
       </article>
