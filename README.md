@@ -1,7 +1,7 @@
 # 📚 Bookmark — 책 리뷰 공유 서비스 (Frontend)
 
-**Bookmark** 는 읽은 책을 기록하고, 다른 독자들과 리뷰를 나누는 웹 서비스입니다.  
-이 레포지토리는 **프론트엔드 전체**를 Vanilla JavaScript 기반으로 구현한 프로젝트로,  
+**Bookmark** 는 읽은 책을 기록하고, 다른 독자들과 리뷰를 나누는 웹 서비스입니다.
+이 레포지토리는 **프론트엔드 전체**를 React 기반으로 구현한 프로젝트로,
 Spring Boot 기반의 Backend API와 연동되어 작동합니다.
 
 ---
@@ -14,22 +14,22 @@ Spring Boot 기반의 Backend API와 연동되어 작동합니다.
 
 ---
 
-## ✨ 주요 기능 (Frontend)
+## ✨ 주요 기능
 
 ### 🔐 1. 사용자 인증 (JWT 기반)
 
 - Access Token + Refresh Token 로그인 구조
-- 로그인 상태 자동 유지 (`/me` 기반 동기화)
+- 401 응답 시 토큰 자동 갱신 후 재시도 (httpClient 인터셉터)
+- 로그인 상태 자동 유지 (`/me` 기반 동기화, `AuthProvider`)
 - 회원가입, 로그인, 로그아웃
 - 프로필 이미지 업로드(Base64 변환)
-- 닉네임 및 프로필 수정
-- 비밀번호 변경 기능 제공
+- 닉네임 및 프로필 수정 / 비밀번호 변경
 
 ---
 
 ### 📝 2. 게시판(리뷰) 기능
 
-- 리뷰 목록 조회
+- 리뷰 목록 조회 (페이지네이션)
 - 리뷰 상세 조회
 - 리뷰 작성 / 수정 / 삭제
 - 작성자 본인만 편집 가능하도록 권한 처리
@@ -40,110 +40,150 @@ Spring Boot 기반의 Backend API와 연동되어 작동합니다.
 ### 💬 3. 댓글 기능
 
 - 댓글 작성 / 수정 / 삭제
-- 동적 렌더링 + 이벤트 위임 방식
-- 작성자 여부에 따른 UI 노출 제어
+- 인라인 수정 UI (편집 중 다른 댓글 수정 불가)
+- 작성자 여부에 따른 액션 버튼 노출 제어
+- 댓글 CRUD 후 목록 자동 새로고침 (경쟁 조건 방지)
 
 ---
 
 ### ❤️ 4. 좋아요 기능
 
 - 게시글 좋아요 / 취소
-- 좋아요 수 실시간 반영
+- Optimistic UI로 즉각 반영 후 서버 응답에 따라 보정
 
 ---
 
-### 🎨 5. UI/UX 기능
+### 🎨 5. UI/UX
 
 - 아바타 드롭다운 메뉴
 - 로그인 여부에 따라 UI 자동 업데이트
-- 폼 입력 검증 헬퍼 시스템
+- 에러/로딩 상태 공통 컴포넌트(`PageStateCard`) + 재시도 버튼
 - 인터랙션 중심의 카드형 레이아웃
-- 에러/로딩 상태 통합 처리
-- SPA 전환을 대비한 모듈 기반 구조
+- 모바일에서도 안정적으로 보이는 기본 반응형 구성
 
 ---
 
 ## 🛠 기술 스택
 
-| 영역              | 사용 기술                                    |
-| ----------------- | -------------------------------------------- |
-| **Language**      | HTML5, CSS3, Vanilla JavaScript (ES Modules) |
-| **Auth**          | JWT (Access / Refresh Token)                 |
-| **API 통신**      | Fetch API + Authorization Header 자동 처리   |
-| **상태 관리**     | LocalStorage + `/me` 기반 사용자 동기화      |
-| **프로젝트 구조** | api / core / common / pages 단위 모듈화      |
-| **서버 연동**     | Spring Boot REST API                         |
-| **실행 환경**     | Live Server (VSCode)                         |
+| 영역              | 사용 기술                                      |
+| ----------------- | ---------------------------------------------- |
+| **Language**      | JavaScript (ES Modules)                        |
+| **UI 프레임워크** | React 18                                       |
+| **빌드 도구**     | Vite 6                                         |
+| **라우팅**        | React Router DOM v6                            |
+| **Auth**          | JWT (Access / Refresh Token)                   |
+| **API 통신**      | Fetch API — `httpClient` (401 자동 갱신 내장)  |
+| **상태 관리**     | React Context (`AuthProvider`) + LocalStorage  |
+| **서버 연동**     | Spring Boot REST API                           |
+
+---
+
+## 📁 프로젝트 구조
+
+```
+FE/react-app/src/
+├── app/
+│   ├── AppLayout.jsx       # 공통 레이아웃 (헤더/아바타 포함)
+│   ├── AuthProvider.jsx    # 전역 인증 상태 Context
+│   └── router.jsx          # React Router 라우트 정의
+├── components/
+│   ├── AvatarDropdown.jsx  # 아바타 드롭다운 메뉴
+│   ├── PageStateCard.jsx   # 로딩/에러 공통 UI 카드
+│   └── comments/
+│       └── CommentList.jsx # 댓글 목록 + 인라인 수정 UI
+├── hooks/
+│   └── useAuth.js          # AuthContext 소비 훅
+├── lib/
+│   ├── api/
+│   │   ├── authApi.js      # 인증 관련 API (signup, login, me, ...)
+│   │   ├── httpClient.js   # Fetch 래퍼 (Bearer 토큰 + 401 자동 갱신)
+│   │   └── postsApi.js     # 게시글/댓글/좋아요 API
+│   ├── storage/
+│   │   └── authStorage.js  # LocalStorage 기반 토큰/유저 저장
+│   └── utils/
+│       └── authErrorUtils.js # 인증 에러 판별 유틸
+└── pages/
+    ├── BoardPage.jsx        # 게시글 목록
+    ├── PostDetailPage.jsx   # 게시글 상세 + 댓글
+    ├── PostCreatePage.jsx   # 게시글 작성
+    ├── PostEditPage.jsx     # 게시글 수정
+    ├── LoginPage.jsx        # 로그인
+    ├── SignupPage.jsx       # 회원가입
+    ├── ProfileEditPage.jsx  # 프로필 수정
+    ├── PasswordEditPage.jsx # 비밀번호 변경
+    └── NotFoundPage.jsx     # 404
+```
+
+---
+
+## 🚀 실행 방법
+
+**사전 조건:** Node.js 18+, Backend API 실행 중
+
+```bash
+# 1. 의존성 설치
+cd FE/react-app
+npm install
+
+# 2. 개발 서버 실행 (http://localhost:5173)
+npm run dev
+
+# 3. 프로덕션 빌드
+npm run build
+
+# 4. 빌드 미리보기
+npm run preview
+```
+
+루트 `FE/` 에서 실행하는 경우:
+
+```bash
+cd FE
+npm run dev      # react-app dev server
+npm run build    # react-app build
+npm run preview  # react-app preview
+```
+
+### 환경 변수
+
+`FE/react-app/.env` 파일을 생성하여 API 서버 주소를 지정할 수 있습니다.
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+미설정 시 `http://localhost:8080` 으로 기본 동작합니다.
 
 ---
 
 ## 🧩 핵심 구현 요약
 
-### 🔹 1. 페이지 단위 모듈 구조
+### 🔹 1. httpClient — 401 자동 갱신 인터셉터
 
-프론트엔드는 `public/assets/js` 내부를 **역할 기반 모듈 구조**로 설계하여 유지보수성과 확장성을 높였습니다.
+`httpClient.js`는 `createHttpClient` 팩토리로 생성되며, 401 응답 시 Refresh Token으로 액세스 토큰을 갱신하고 원래 요청을 **자동으로 1회 재시도**합니다.
 
-- **core/** → HTTP, DOM, Storage 등 핵심 유틸리티
-- **api/** → 백엔드 REST API 래퍼(인증 헤더 자동 포함)
-- **common/** → 아바타 메뉴, 공통 UI 요소
-- **pages/** → 각 페이지의 비즈니스 로직(Login, Signup, Board, Profile 등)
+- 동시 다발적 401 요청에 대해 갱신을 **단일 Promise로 중복 제거**
+- 갱신 실패 시 `onRefreshFailed` 콜백으로 저장된 인증 정보 초기화
+- 인증이 필요 없는 요청에는 `publicHttpClient`(토큰 없음) 사용
 
-각 페이지는 독립적으로 동작하며, 공통 기능은 모듈 단위로 재사용할 수 있도록 구성했습니다.
+### 🔹 2. AuthProvider — 전역 인증 상태 관리
 
----
+`AuthProvider`가 React Context로 `user`, `isInitializing`, `login`, `logout` 등을 제공합니다.
 
-### 🔹 2. JWT 인증 기반 Fetch API 통신
-
-- 모든 API 요청은 `http.js`의 `request()` 함수로 통일하여 관리
-- Access Token이 자동으로 Authorization 헤더에 포함되도록 구성
-- 서버 응답 오류를 정규화해 일관된 에러 메시지 처리
-- Refresh Token 기반 자동 재인증 구조(`/refresh`)까지 대응 가능한 형태로 설계
-
-→ 기존 세션 기반 인증에서 완전히 벗어나 **순수 JWT 방식으로 전환**했습니다.
-
----
+- 앱 진입 시 `/me` 호출로 세션 복원 (`isInitializing`으로 가드)
+- `localStorage` 변경 이벤트 + 커스텀 `auth:changed` 이벤트로 탭 간 동기화
+- `useAuth()` 훅으로 어디서든 인증 상태 접근
 
 ### 🔹 3. 이미지 업로드 (Base64)
 
-프로필 이미지 및 리뷰 이미지 업로드 시 다음 흐름을 적용했습니다.
+프로필 이미지 및 리뷰 이미지는 `FileReader`로 Base64 변환 후 서버 전송합니다.
+별도의 파일 서버 없이 이미지 기반 기능을 구현합니다.
 
-1. `FileReader`로 로컬 이미지를 Base64 문자열로 변환
-2. 미리보기 UI 반영
-3. 변환된 Base64 데이터를 서버로 전송
+### 🔹 4. 댓글 재조회 경쟁 조건 방지
 
-이를 통해 별도의 파일 서버 없이도 이미지 기반 기능을 구현할 수 있었습니다.
+댓글 CRUD 후 목록을 다시 불러올 때 `AbortController` + 시퀀스 번호(`commentsSeqRef`)로 이전 요청을 취소하고 오래된 응답을 무시합니다.
 
----
+### 🔹 5. 에러/로딩 상태 공통화
 
-### 🔹 4. 입력 검증(Validation) 헬퍼 시스템
-
-- `setHelper()`, `clearFormHelpers()`를 활용하여 유효성 검사 메시지를 통일적으로 관리
-- 이메일, 비밀번호, 비밀번호 확인, 닉네임 등의 검증을 페이지마다 반복 없이 처리 가능
-- 사용자 입력 오류에 즉각적인 피드백 제공
-
-UX 일관성을 유지하는 데 중요한 역할을 했습니다.
-
----
-
-### 🔹 5. 아바타 UI 컴포넌트
-
-로그인 유저 정보를 기반으로 동적으로 렌더링되는 UI 요소입니다.
-
-- `/me` API 응답으로 로그인 상태를 자동 동기화
-- 아바타 클릭 시 드롭다운 메뉴 노출
-- 프로필 수정 / 비밀번호 변경 / 로그아웃 기능 연결
-- 프로필 이미지가 없을 경우 기본 이모지 표시
-- 이미지 적용 시 CSS 변수 기반 배경 아바타로 렌더링
-
-JWT 적용 후에도 안정적으로 동작하도록 전체 구조를 재정비했습니다.
-
----
-
-## 🎨 UI/UX 특징
-
-- 따뜻한 톤 기반의 직관적인 인터페이스
-- 리뷰·댓글 중심의 카드형 레이아웃
-- hover·focus 중심의 부드러운 사용자 인터랙션
-- 모든 입력 폼에서 통일된 에러 처리 및 helper UI 제공
-- (향후) SPA 전환을 고려한 모듈 설계 기반 구조
-- 모바일에서도 안정적으로 보이는 기본 반응형 구성
+`PageStateCard` 컴포넌트로 로딩 메시지, 에러 메시지, 재시도 버튼을 통일합니다.
+`BoardPage`, `PostDetailPage`, `PostEditPage` 등에서 공유 사용합니다.
