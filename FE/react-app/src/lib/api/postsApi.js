@@ -89,9 +89,19 @@ export function unlikePost(postId) {
   return httpClient.delete(`${POSTS_BASE_PATH}/${postId}/like`);
 }
 
+export async function createPost(payload = {}) {
+  const response = await httpClient.post(POSTS_BASE_PATH, {
+    title: payload.title,
+    content: payload.content,
+    image_url: payload.imageUrl ?? null,
+  });
+  return unwrapApiData(response);
+}
+
 export const postsApi = {
   getPosts,
   getPostDetail,
   likePost,
   unlikePost,
+  createPost,
 };
