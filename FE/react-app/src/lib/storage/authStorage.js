@@ -1,8 +1,14 @@
-const AUTH_STORAGE_KEY = "amumal_auth";
+export const AUTH_STORAGE_KEY = "amumal_auth";
+export const AUTH_CHANGED_EVENT = "auth:changed";
 
 function getStorage() {
   if (typeof window === "undefined") return null;
   return window.localStorage;
+}
+
+function notifyAuthChanged() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
 }
 
 function normalizeAuthPatch(partial) {
@@ -45,10 +51,12 @@ function writeAuth(value) {
 
   if (!value || typeof value !== "object" || Object.keys(value).length === 0) {
     storage.removeItem(AUTH_STORAGE_KEY);
+    notifyAuthChanged();
     return;
   }
 
   storage.setItem(AUTH_STORAGE_KEY, JSON.stringify(value));
+  notifyAuthChanged();
 }
 
 export function loadAuth() {
@@ -75,9 +83,7 @@ export function saveAuth(partial) {
 }
 
 export function clearAuth() {
-  const storage = getStorage();
-  if (!storage) return;
-  storage.removeItem(AUTH_STORAGE_KEY);
+  writeAuth(null);
 }
 
 export function loadUserId() {

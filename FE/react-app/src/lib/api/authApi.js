@@ -8,6 +8,13 @@ import {
 
 const USERS_BASE_PATH = "/api/v1/users";
 
+function unwrapApiData(response) {
+  if (response && typeof response === "object" && "success" in response && "data" in response) {
+    return response.data;
+  }
+  return response;
+}
+
 function toSignupRequest(payload = {}) {
   return {
     email: payload.email,
@@ -48,7 +55,8 @@ export async function signup(payload) {
 
 export async function login(payload) {
   const requestBody = toLoginRequest(payload);
-  const data = await publicHttpClient.post(`${USERS_BASE_PATH}/login`, requestBody);
+  const response = await publicHttpClient.post(`${USERS_BASE_PATH}/login`, requestBody);
+  const data = unwrapApiData(response);
 
   saveAuthResponse(data);
   if (requestBody.email) saveAuth({ email: requestBody.email });
@@ -57,17 +65,18 @@ export async function login(payload) {
 }
 
 export async function refresh(refreshToken) {
-  const data = await publicHttpClient.post(
+  const response = await publicHttpClient.post(
     `${USERS_BASE_PATH}/refresh`,
     buildRefreshTokenRequestBody(refreshToken),
   );
+  const data = unwrapApiData(response);
 
   saveAuthResponse(data);
   return data;
 }
 
 export function getMe() {
-  return httpClient.get(`${USERS_BASE_PATH}/me`);
+  return httpClient.get(`${USERS_BASE_PATH}/me`).then(unwrapApiData);
 }
 
 export function updateProfile(payload) {

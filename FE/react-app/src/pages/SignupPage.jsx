@@ -32,7 +32,7 @@ function normalizeFieldMessage(field, message) {
 }
 
 function mapServerError(error) {
-  const code = error?.payload?.code;
+  const code = error?.payload?.code ?? error?.code;
   const detail = error?.payload?.detail;
   const message = error?.message;
 
@@ -61,7 +61,7 @@ function mapServerError(error) {
     if (Object.keys(mapped).length > 0) return mapped;
   }
 
-  if (message === "이메일이 이미 존재합니다." || code === "duplicate_user") {
+  if (code === "duplicate_user") {
     return { email: "이미 사용 중인 이메일입니다." };
   }
 

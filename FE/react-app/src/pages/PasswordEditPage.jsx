@@ -54,7 +54,7 @@ function PasswordEditPage() {
   };
 
   const mapServerError = (error) => {
-    const code = error?.payload?.code;
+    const code = error?.payload?.code ?? error?.code;
     const detail = error?.payload?.detail;
     const message = error?.message;
 
@@ -74,14 +74,9 @@ function PasswordEditPage() {
       if (Object.keys(mapped).length > 0) return mapped;
     }
 
-    if (message === "현재 비밀번호가 일치하지 않습니다.") {
-      return { oldPassword: "현재 비밀번호가 일치하지 않습니다." };
-    }
-
     switch (code) {
       case "UNAUTHORIZED":
       case "FORBIDDEN":
-      case "unauthorized":
         return { form: "로그인이 필요합니다. 다시 로그인해주세요." };
       case "invalid_request":
         return { form: "입력값을 다시 확인해주세요." };

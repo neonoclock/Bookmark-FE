@@ -8,7 +8,7 @@ function isValidEmail(value) {
 }
 
 function mapServerError(error) {
-  const code = error?.payload?.code;
+  const code = error?.payload?.code ?? error?.code;
   const message = error?.message;
   const detail = error?.payload?.detail;
 
@@ -27,6 +27,8 @@ function mapServerError(error) {
       return { form: "입력값을 다시 확인해주세요." };
     case "invalid_json":
       return { form: "요청 형식이 올바르지 않습니다." };
+    case "internal_error":
+      return { form: "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요." };
     default:
       return { form: message || "로그인 중 오류가 발생했습니다." };
   }
