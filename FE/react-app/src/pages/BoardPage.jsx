@@ -1,43 +1,58 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { postsApi } from "@/lib/api/postsApi.js";
 import "./BoardPage.css";
 
-const MOCK_POSTS = [
-  {
-    id: 101,
-    title: "헤르만 헤세를 다시 읽고",
-    createdAt: "2026-02-27 22:13:00",
-    likes: 12,
-    views: 86,
-    commentsCount: 4,
-    authorNickname: "문장수집가",
-    authorProfileImage: "",
-  },
-  {
-    id: 102,
-    title: "짧은 단상",
-    createdAt: "2026-02-26 10:02:00",
-    likes: 5,
-    views: 34,
-    commentsCount: 1,
-    authorNickname: "종이책파",
-    authorProfileImage: "",
-  },
-  {
-    id: 103,
-    title: "밤의 도서관 추천",
-    createdAt: "2026-02-25 18:41:00",
-    likes: 18,
-    views: 117,
-    commentsCount: 9,
-    authorNickname: "moonreader",
-    authorProfileImage: "",
-  },
-];
+function mapPostsListError(error) {
+  const code = error?.payload?.code ?? error?.code;
+
+  switch (code) {
+    case "invalid_request":
+      return "요청값이 올바르지 않습니다.";
+    case "not_found":
+      return "게시글 목록을 찾을 수 없습니다.";
+    case "internal_error":
+      return "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+    default:
+      return error?.message || "게시글을 불러오는 중 오류가 발생했습니다.";
+  }
+}
 
 function BoardPage() {
   const navigate = useNavigate();
-  const posts = useMemo(() => MOCK_POSTS, []);
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const loadPosts = useCallback(async (signal) => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const response = await postsApi.getPosts({
+        page: 0,
+        limit: 10,
+        sort: "DATE",
+        signal,
+      });
+      if (signal?.aborted) return;
+      setPosts(response.items);
+    } catch (error) {
+      if (signal?.aborted || error?.name === "AbortError") return;
+      setPosts([]);
+      setErrorMessage(mapPostsListError(error));
+    } finally {
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadPosts(controller.signal);
+    return () => controller.abort();
+  }, [loadPosts]);
 
   return (
     <section className="board-page">
@@ -57,7 +72,21 @@ function BoardPage() {
       </section>
 
       <section className="board-list" aria-label="게시글 목록">
-        {posts.length === 0 ? (
+        {isLoading ? (
+          <p className="board-empty">게시글을 불러오는 중입니다...</p>
+        ) : errorMessage ? (
+          <div className="board-list-state">
+            <p className="board-empty">{errorMessage}</p>
+            <button
+              className="board-retry-btn"
+              type="button"
+              disabled={isLoading}
+              onClick={() => void loadPosts()}
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : posts.length === 0 ? (
           <p className="board-empty">아직 작성된 게시글이 없습니다.</p>
         ) : (
           posts.map((post) => (
@@ -81,7 +110,9 @@ function BoardPage() {
 
               <div className="board-post__meta">
                 <span>좋아요 {post.likes ?? 0}</span>
-                <span>댓글 {post.commentsCount ?? 0}</span>
+                {typeof post.commentsCount === "number" ? (
+                  <span>댓글 {post.commentsCount}</span>
+                ) : null}
                 <span>조회수 {post.views ?? 0}</span>
               </div>
 
