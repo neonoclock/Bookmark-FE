@@ -1,34 +1,22 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import AppLayout from "./app/AppLayout.jsx";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+    <AppLayout>
+      <section className="intro-card">
+        <p className="intro-card__label">React Migration</p>
+        <h1 className="intro-card__title">Bookmark 프론트엔드 마이그레이션</h1>
+        <p className="intro-card__desc">
+          기본 앱 레이아웃과 전역 스타일을 먼저 구성했습니다.
         </p>
+      </section>
+      <div className="placeholder-grid">
+        <article className="placeholder-block">로그인 페이지</article>
+        <article className="placeholder-block">회원가입 페이지</article>
+        <article className="placeholder-block">게시글 목록 페이지</article>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </AppLayout>
   );
 }
 
