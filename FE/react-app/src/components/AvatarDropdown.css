@@ -1,0 +1,75 @@
+.avatar-dropdown {
+  position: relative;
+  margin-left: auto;
+}
+
+.avatar-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #d8c5ae;
+  background: radial-gradient(circle at 30% 20%, #fff0de, #edd8bd);
+  color: #5a4634;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.avatar-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.avatar-button--image {
+  background-image: var(--avatar-url);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: transparent;
+  border-color: transparent;
+}
+
+.avatar-menu {
+  position: absolute;
+  right: 0;
+  margin-top: 8px;
+  min-width: 160px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #ecdcc9;
+  box-shadow: 0 12px 28px rgba(56, 41, 23, 0.14);
+  padding: 4px 0;
+  display: none;
+  z-index: 20;
+}
+
+.avatar-dropdown--open .avatar-menu {
+  display: block;
+}
+
+.avatar-menu a,
+.avatar-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 13px;
+  border: 0;
+  background: transparent;
+  color: #3a2a20;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.avatar-menu a:hover,
+.avatar-menu button:hover {
+  background: #fff2e0;
+}
+
+.avatar-menu__logout {
+  color: #a02f2f;
+}

@@ -1,3 +1,5 @@
+import AvatarDropdown from "@/components/AvatarDropdown.jsx";
+import { Link } from "react-router-dom";
 import "./AppLayout.css";
 
 function AppLayout({ children }) {
@@ -5,7 +7,10 @@ function AppLayout({ children }) {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header__inner">
-          <strong className="app-brand">Bookmark</strong>
+          <Link className="app-brand" to="/board">
+            Bookmark
+          </Link>
+          <AvatarDropdown />
         </div>
       </header>
       <main className="app-main">
