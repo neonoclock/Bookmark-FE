@@ -1,4 +1,9 @@
-import { loadAccessToken } from "@/lib/storage/authStorage.js";
+import {
+  clearAuth,
+  loadAccessToken,
+  loadRefreshToken,
+  saveAuthResponse,
+} from "@/lib/storage/authStorage.js";
 
 const DEFAULT_BASE_URL = "http://localhost:8080";
 const DEFAULT_ERROR_MESSAGE = "요청에 실패했습니다.";
@@ -61,10 +66,17 @@ export function createHttpClient(config = {}) {
   const {
     baseUrl = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE_URL,
     getAccessToken,
+    // async () => boolean — true if tokens were refreshed successfully
+    refreshTokens,
+    // () => void — called when refresh fails (e.g. clear stored auth)
+    onRefreshFailed,
   } = config;
 
+  // Deduplicates concurrent 401 → refresh attempts within this client instance.
+  let pendingRefresh = null;
+
   async function request(path, options = {}) {
-    const { method = "GET", headers, body, query, signal } = options;
+    const { method = "GET", headers, body, query, signal, _isRetry = false } = options;
     const token = getAccessToken?.();
     const isFormData = body instanceof FormData;
 
@@ -87,6 +99,28 @@ export function createHttpClient(config = {}) {
     const raw = await parseResponseBody(response);
 
     if (!response.ok) {
+      // On first 401, attempt a token refresh and retry the request once.
+      if (response.status === 401 && refreshTokens && !_isRetry && !signal?.aborted) {
+        if (!pendingRefresh) {
+          pendingRefresh = refreshTokens().finally(() => {
+            pendingRefresh = null;
+          });
+        }
+
+        let refreshed = false;
+        try {
+          refreshed = await pendingRefresh;
+        } catch {
+          refreshed = false;
+        }
+
+        if (refreshed) {
+          return request(path, { ...options, _isRetry: true });
+        }
+
+        onRefreshFailed?.();
+      }
+
       throw new HttpError(normalizeErrorMessage(raw), response.status, raw);
     }
 
@@ -120,8 +154,24 @@ export function createHttpClient(config = {}) {
   };
 }
 
+// Public client — no auth header, no refresh logic.
+export const publicHttpClient = createHttpClient();
+
+// Authenticated client — attaches Bearer token and auto-refreshes on 401.
 export const httpClient = createHttpClient({
   getAccessToken: loadAccessToken,
+  async refreshTokens() {
+    const refreshToken = loadRefreshToken();
+    if (!refreshToken) return false;
+    try {
+      const data = await publicHttpClient.post("/api/v1/users/refresh", {
+        refresh_token: refreshToken,
+      });
+      saveAuthResponse(data);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  onRefreshFailed: clearAuth,
 });
-
-export const publicHttpClient = createHttpClient();

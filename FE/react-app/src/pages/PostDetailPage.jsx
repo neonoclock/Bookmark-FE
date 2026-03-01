@@ -4,6 +4,7 @@ import CommentList from "@/components/comments/CommentList.jsx";
 import PageStateCard from "@/components/PageStateCard.jsx";
 import { postsApi } from "@/lib/api/postsApi.js";
 import { useAuth } from "@/hooks/useAuth.js";
+import { isUnauthorizedError } from "@/lib/utils/authErrorUtils.js";
 import "./PostDetailPage.css";
 
 function splitParagraphs(text) {
@@ -42,17 +43,6 @@ function mapActionError(error, fallback) {
   }
 }
 
-function isUnauthorizedError(error) {
-  const code = error?.payload?.code ?? error?.code;
-  const status = error?.status;
-  return (
-    status === 401 ||
-    status === 403 ||
-    code === "UNAUTHORIZED" ||
-    code === "FORBIDDEN" ||
-    code === "unauthorized"
-  );
-}
 
 function PostDetailPage() {
   const navigate = useNavigate();

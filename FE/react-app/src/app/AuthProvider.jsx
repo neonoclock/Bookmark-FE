@@ -6,6 +6,7 @@ import {
   clearAuth,
   loadAccessToken,
 } from "@/lib/storage/authStorage.js";
+import { isUnauthorizedError } from "@/lib/utils/authErrorUtils.js";
 
 const AuthContext = createContext(null);
 
@@ -20,17 +21,6 @@ function normalizeUser(user) {
   };
 }
 
-function isUnauthorizedError(error) {
-  const code = error?.payload?.code ?? error?.code;
-  const status = error?.status;
-
-  return (
-    status === 401 ||
-    status === 403 ||
-    code === "UNAUTHORIZED" ||
-    code === "FORBIDDEN"
-  );
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
