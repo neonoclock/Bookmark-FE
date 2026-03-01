@@ -42,6 +42,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.signup-avatar-upload--filled .signup-avatar-plus {
+  opacity: 0;
 }
 
 .signup-avatar-plus {
@@ -89,6 +96,16 @@
   color: #9a806b;
 }
 
+.signup-helper--error {
+  color: #c64545;
+}
+
+.signup-form-error {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #c64545;
+}
+
 .signup-submit {
   margin-top: 8px;
   height: 46px;
@@ -103,6 +120,11 @@
 
 .signup-submit:hover {
   background: #5d412d;
+}
+
+.signup-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .signup-login-link {
