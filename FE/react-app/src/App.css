@@ -1,0 +1,41 @@
+.app-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.app-nav a {
+  padding: 8px 12px;
+  border: 1px solid #e5d3bd;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #5a4b3e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.app-nav a.active {
+  background-color: #4a3524;
+  color: #fff9ef;
+  border-color: #4a3524;
+}
+
+.page-stub {
+  background-color: #fff;
+  border: 1px solid #eddcc8;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(62, 48, 32, 0.05);
+}
+
+.page-stub__title {
+  margin: 0;
+  font-size: 22px;
+  color: #322519;
+}
+
+.page-stub__desc {
+  margin: 8px 0 0;
+  color: #786a5a;
+}
