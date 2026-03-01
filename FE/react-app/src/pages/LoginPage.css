@@ -61,6 +61,16 @@
   color: #9a806b;
 }
 
+.helper--error {
+  color: #c64545;
+}
+
+.login-form-error {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #c64545;
+}
+
 .login-submit {
   margin-top: 8px;
   height: 46px;
@@ -75,6 +85,11 @@
 
 .login-submit:hover {
   background: #5d412d;
+}
+
+.login-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .login-signup-link {
