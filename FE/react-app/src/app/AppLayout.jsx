@@ -7,18 +7,18 @@ function AppLayout({ children }) {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header__inner">
+          <div className="app-header__side" />
           <Link className="app-brand" to="/board">
-            Bookmark
+            책갈피
           </Link>
-          <AvatarDropdown />
+          <div className="app-header__side app-header__side--right">
+            <AvatarDropdown />
+          </div>
         </div>
       </header>
       <main className="app-main">
         <div className="app-main__inner">{children}</div>
       </main>
-      <footer className="app-footer">
-        <div className="app-footer__inner">Bookmark Frontend</div>
-      </footer>
     </div>
   );
 }

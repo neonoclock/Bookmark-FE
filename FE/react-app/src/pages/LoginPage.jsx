@@ -82,54 +82,68 @@ function LoginPage() {
   };
 
   return (
-    <section className="login-page">
-      <article className="login-card">
-        <h1 className="login-card__title">로그인</h1>
-        <form className="login-form" autoComplete="off" onSubmit={handleSubmit}>
-          <div className="login-field">
-            <label htmlFor="login-email">이메일</label>
-            <input
-              id="login-email"
-              type="email"
-              placeholder="이메일을 입력하세요"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting}
-            />
-            <p className={`helper ${errors.email ? "helper--error" : ""}`}>
-              {errors.email || " "}
-            </p>
-          </div>
+    <div className="login-page">
+      <header className="login-page-header">
+        <button
+          className="login-back-btn"
+          type="button"
+          onClick={() => navigate(-1)}
+          aria-label="뒤로가기"
+        >
+          ←
+        </button>
+        <span className="login-brand">책갈피</span>
+      </header>
 
-          <div className="login-field">
-            <label htmlFor="login-password">비밀번호</label>
-            <input
-              id="login-password"
-              type="password"
-              placeholder="비밀번호를 입력하세요"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isSubmitting}
-            />
-            <p className={`helper ${errors.password ? "helper--error" : ""}`}>
-              {errors.password || " "}
-            </p>
-          </div>
+      <main className="login-main">
+        <div className="login-card">
+          <p className="login-card-deco" aria-hidden="true">
+            ~~~~~~~~~~
+          </p>
+          <h1 className="login-title">로그인</h1>
 
-          {errors.form ? <p className="login-form-error">{errors.form}</p> : null}
+          <form className="login-form" autoComplete="off" onSubmit={handleSubmit}>
+            <div className="login-field">
+              <label htmlFor="login-email">이메일</label>
+              <input
+                id="login-email"
+                type="email"
+                placeholder="이메일을 입력하세요"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+              />
+              {errors.email ? <p className="login-helper login-helper--error">{errors.email}</p> : null}
+            </div>
 
-          <button type="submit" className="login-submit" disabled={isSubmitting}>
-            {isSubmitting ? "로그인 중..." : "로그인"}
-          </button>
-        </form>
+            <div className="login-field">
+              <label htmlFor="login-password">비밀번호</label>
+              <input
+                id="login-password"
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
+              />
+              {errors.password ? <p className="login-helper login-helper--error">{errors.password}</p> : null}
+            </div>
 
-        <Link className="login-signup-link" to="/signup">
-          회원가입
-        </Link>
-      </article>
-    </section>
+            {errors.form ? <p className="login-form-error">{errors.form}</p> : null}
+
+            <button type="submit" className="login-submit" disabled={isSubmitting}>
+              {isSubmitting ? "로그인 중..." : "로그인"}
+            </button>
+          </form>
+
+          <Link className="login-signup-link" to="/signup">
+            회원가입
+          </Link>
+        </div>
+      </main>
+    </div>
   );
 }
 
