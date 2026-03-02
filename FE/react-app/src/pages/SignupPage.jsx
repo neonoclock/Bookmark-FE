@@ -161,10 +161,7 @@ function SignupPage() {
     if (file.size > MAX_AVATAR_SIZE) {
       setProfileImage(null);
       setAvatarFileName("");
-      setErrors((prev) => ({
-        ...prev,
-        avatar: "이미지 크기는 2MB 이하여야 합니다.",
-      }));
+      setErrors((prev) => ({ ...prev, avatar: "이미지 크기는 2MB 이하여야 합니다." }));
       return;
     }
 
@@ -176,125 +173,144 @@ function SignupPage() {
     } catch {
       setProfileImage(null);
       setAvatarFileName("");
-      setErrors((prev) => ({
-        ...prev,
-        avatar: "이미지를 읽는 중 오류가 발생했습니다.",
-      }));
+      setErrors((prev) => ({ ...prev, avatar: "이미지를 읽는 중 오류가 발생했습니다." }));
     }
   };
 
-  const avatarHelperText = errors.avatar || (avatarFileName ? `선택된 파일: ${avatarFileName}` : " ");
-
   return (
-    <section className="signup-page">
-      <article className="signup-card">
-        <h1 className="signup-title">회원가입</h1>
+    <div className="signup-page">
+      <header className="signup-page-header">
+        <button
+          className="signup-back-btn"
+          type="button"
+          onClick={() => navigate(-1)}
+          aria-label="뒤로가기"
+        >
+          ←
+        </button>
+        <span className="signup-brand">책갈피</span>
+      </header>
 
-        <div className="signup-avatar-block">
-          <label className="signup-label" htmlFor="signup-avatar">
-            프로필 사진
-          </label>
-          <label
-            className={`signup-avatar-upload ${profileImage ? "signup-avatar-upload--filled" : ""}`}
-            htmlFor="signup-avatar"
-            style={profileImage ? { backgroundImage: `url(${profileImage})` } : undefined}
-          >
-            <input
-              id="signup-avatar"
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleAvatarChange}
-              disabled={isSubmitting}
-            />
-            <span className="signup-avatar-plus">+</span>
-          </label>
-          <p className={`signup-helper ${errors.avatar ? "signup-helper--error" : ""}`}>
-            {avatarHelperText}
+      <main className="signup-main">
+        <div className="signup-card">
+          <p className="signup-card-deco" aria-hidden="true">
+            ~~~~~~~~~~
           </p>
+          <h1 className="signup-title">회원가입</h1>
+
+          <div className="signup-avatar-block">
+            <label className="signup-label" htmlFor="signup-avatar">
+              프로필 사진
+            </label>
+            <label
+              className="signup-avatar-upload"
+              htmlFor="signup-avatar"
+              style={profileImage ? { backgroundImage: `url(${profileImage})` } : undefined}
+            >
+              <input
+                id="signup-avatar"
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleAvatarChange}
+                disabled={isSubmitting}
+              />
+              {!profileImage && (
+                <>
+                  <span className="signup-avatar-bookmark" aria-hidden="true" />
+                  <span className="signup-avatar-plus">+</span>
+                </>
+              )}
+            </label>
+            {errors.avatar ? (
+              <p className="signup-helper signup-helper--error">{errors.avatar}</p>
+            ) : avatarFileName ? (
+              <p className="signup-helper">{avatarFileName}</p>
+            ) : null}
+          </div>
+
+          <form className="signup-form" autoComplete="off" onSubmit={handleSubmit}>
+            <div className="signup-field">
+              <label className="signup-label" htmlFor="signup-email">
+                이메일
+              </label>
+              <input
+                id="signup-email"
+                type="email"
+                placeholder="이메일을 입력하세요"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                disabled={isSubmitting}
+              />
+              {errors.email ? (
+                <p className="signup-helper signup-helper--error">{errors.email}</p>
+              ) : null}
+            </div>
+
+            <div className="signup-field">
+              <label className="signup-label" htmlFor="signup-password">
+                비밀번호
+              </label>
+              <input
+                id="signup-password"
+                type="password"
+                placeholder="비밀번호를 입력하세요"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                disabled={isSubmitting}
+              />
+              {errors.password ? (
+                <p className="signup-helper signup-helper--error">{errors.password}</p>
+              ) : null}
+            </div>
+
+            <div className="signup-field">
+              <label className="signup-label" htmlFor="signup-password-check">
+                비밀번호 확인
+              </label>
+              <input
+                id="signup-password-check"
+                type="password"
+                placeholder="비밀번호를 한번 더 입력하세요"
+                value={passwordCheck}
+                onChange={(event) => setPasswordCheck(event.target.value)}
+                disabled={isSubmitting}
+              />
+              {errors.passwordCheck ? (
+                <p className="signup-helper signup-helper--error">{errors.passwordCheck}</p>
+              ) : null}
+            </div>
+
+            <div className="signup-field">
+              <label className="signup-label" htmlFor="signup-nickname">
+                닉네임
+              </label>
+              <input
+                id="signup-nickname"
+                type="text"
+                placeholder="닉네임을 입력하세요"
+                value={nickname}
+                onChange={(event) => setNickname(event.target.value)}
+                disabled={isSubmitting}
+              />
+              {errors.nickname ? (
+                <p className="signup-helper signup-helper--error">{errors.nickname}</p>
+              ) : null}
+            </div>
+
+            {errors.form ? <p className="signup-form-error">{errors.form}</p> : null}
+
+            <button className="signup-submit" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "회원가입 중..." : "회원가입"}
+            </button>
+          </form>
+
+          <Link className="signup-login-link" to="/login">
+            로그인하러 가기 ↗
+          </Link>
         </div>
-
-        <form className="signup-form" autoComplete="off" onSubmit={handleSubmit}>
-          <div className="signup-field">
-            <label className="signup-label" htmlFor="signup-email">
-              이메일
-            </label>
-            <input
-              id="signup-email"
-              type="email"
-              placeholder="이메일을 입력하세요"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              disabled={isSubmitting}
-            />
-            <p className={`signup-helper ${errors.email ? "signup-helper--error" : ""}`}>
-              {errors.email || " "}
-            </p>
-          </div>
-
-          <div className="signup-field">
-            <label className="signup-label" htmlFor="signup-password">
-              비밀번호
-            </label>
-            <input
-              id="signup-password"
-              type="password"
-              placeholder="비밀번호를 입력하세요"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              disabled={isSubmitting}
-            />
-            <p className={`signup-helper ${errors.password ? "signup-helper--error" : ""}`}>
-              {errors.password || " "}
-            </p>
-          </div>
-
-          <div className="signup-field">
-            <label className="signup-label" htmlFor="signup-password-check">
-              비밀번호 확인
-            </label>
-            <input
-              id="signup-password-check"
-              type="password"
-              placeholder="비밀번호를 한번 더 입력하세요"
-              value={passwordCheck}
-              onChange={(event) => setPasswordCheck(event.target.value)}
-              disabled={isSubmitting}
-            />
-            <p className={`signup-helper ${errors.passwordCheck ? "signup-helper--error" : ""}`}>
-              {errors.passwordCheck || " "}
-            </p>
-          </div>
-
-          <div className="signup-field">
-            <label className="signup-label" htmlFor="signup-nickname">
-              닉네임
-            </label>
-            <input
-              id="signup-nickname"
-              type="text"
-              placeholder="닉네임을 입력하세요"
-              value={nickname}
-              onChange={(event) => setNickname(event.target.value)}
-              disabled={isSubmitting}
-            />
-            <p className={`signup-helper ${errors.nickname ? "signup-helper--error" : ""}`}>
-              {errors.nickname || " "}
-            </p>
-          </div>
-
-          {errors.form ? <p className="signup-form-error">{errors.form}</p> : null}
-
-          <button className="signup-submit" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "회원가입 중..." : "회원가입"}
-          </button>
-        </form>
-
-        <Link className="signup-login-link" to="/login">
-          로그인하러 가기
-        </Link>
-      </article>
-    </section>
+      </main>
+    </div>
   );
 }
 
