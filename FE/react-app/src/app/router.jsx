@@ -14,11 +14,11 @@ import SignupPage from "@/pages/SignupPage.jsx";
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
   { path: "/signup", element: <SignupPage /> },
+  { path: "/login", element: <LoginPage /> },
   {
     element: <App />,
     children: [
       { path: "board", element: <BoardPage /> },
-      { path: "login", element: <LoginPage /> },
       { path: "password-edit", element: <PasswordEditPage /> },
       { path: "profile-edit", element: <ProfileEditPage /> },
       { path: "post-create", element: <PostCreatePage /> },
